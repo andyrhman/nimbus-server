@@ -18,8 +18,9 @@ model User {
   nama String
   username String @unique
   email String @unique
-  profile_pic String @default("https://storage.googleapis.com/nimbus-storage/user.png")
+  profile_pic String @default("https://storage.googleapis.com/nimbus-storage/profile_pics/user.png")
   password String
+  is_user Boolean @default(true)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

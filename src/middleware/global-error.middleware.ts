@@ -19,7 +19,7 @@ export const errorMiddleware = (
     res.status(err.statusCode).json({ message: "Internal Server Error" });
 };
 
-export const asyncError = (
+export const asyncError: any = (
     passedFunc: (req: Request, res: Response, next: NextFunction) => Promise<void>
 ) => (req: Request, res: Response, next: NextFunction): void => {
     Promise.resolve(passedFunc(req, res, next)).catch(next);

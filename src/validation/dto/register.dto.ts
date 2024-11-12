@@ -2,8 +2,8 @@ import { IsString, Length, IsEmail } from 'class-validator';
 import { IsEqualTo } from '../decorator/check-password.decorator';
 
 export class RegisterDto {
-    @IsString({ message: 'Full name must be a string' })
-    fullname: string;
+    @IsString({ message: 'Nama must be a string' })
+    nama: string;
 
     @IsString()
     @Length(3, 30, { message: 'Username must be between 3 and 30 characters' })

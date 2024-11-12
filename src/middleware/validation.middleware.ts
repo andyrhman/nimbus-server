@@ -1,26 +1,25 @@
-import { ValidationError } from 'class-validator';
-import express, { ErrorRequestHandler } from 'express';
+import { ValidationError } from "class-validator";
+import express from "express";
 
-export const ValidationMiddleware: ErrorRequestHandler = (
-    err: any,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-): void | Promise<void> => {
-    if (Array.isArray(err) && err[0] instanceof ValidationError) {
-        const formattedErrors = err.map(e => {
-            const constraints = e.constraints;
-            const messages = constraints ? Object.values(constraints) : [];
-            return { message: messages[0] }; // This will return only the first error message
-        });
+export const ValidationMiddleware: any = (
+  err: any,
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  if (Array.isArray(err) && err[0] instanceof ValidationError) {
+    const formattedErrors = err.map((e) => {
+      const constraints = e.constraints;
+      const messages = constraints ? Object.values(constraints) : [];
+      return { message: messages[0] };
+    });
 
-        // Filter out undefined messages if any field did not have a constraint violation
-        const errorMessages = formattedErrors.filter(e => e.message).map(e => e.message);
+    const errorMessages = formattedErrors
+      .filter((e) => e.message)
+      .map((e) => e.message);
 
-        res.status(400).json({ errors: errorMessages });
-        return undefined; // Explicitly return undefined to match void return type
-    }
+    return res.status(400).json({ errors: errorMessages });
+  }
 
-    // If it's not a validation error, just pass it on
-    next(err);
+  return next(err);
 };

@@ -16,7 +16,7 @@ Here are the features of our backend server API:
 - Logging and monitoring
 - Travel Destination Recommendation
 
-## Requirements
+## Tools we use
 
 Here are the tools that we use to create this server:
 - Node.js v20.17

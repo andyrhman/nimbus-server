@@ -1,8 +1,7 @@
 # Node.js
 node_modules/
-uploads/*
-!uploads/.gitkeep 
 dist/
+src/config/serviceAccount.json
 
 # Logs
 logs

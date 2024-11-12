@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import * as argon2 from 'argon2';
-import jwt from 'jsonwebtoken';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { RegisterDto } from '../validation/dto/register.dto';
@@ -8,8 +6,13 @@ import { formatValidationErrors } from '../utility/validation.utility';
 import { UpdateInfoDTO } from '../validation/dto/update-info.dto';
 import { myPrisma } from '../config/db.config';
 import { UpdatePasswordDTO } from '../validation/dto/update-password.dto';
+import { asyncError } from '../middleware/global-error.middleware';
+import { bucket, upload } from '../config/storage.config';
+import { v4 as uuidv4 } from 'uuid';
+import jwt from 'jsonwebtoken';
+import * as argon2 from 'argon2';
 
-export const Register = async (req: Request, res: Response) => {
+export const Register: any = asyncError(async (req: Request, res: Response) => {
     const body = req.body;
     const input = plainToClass(RegisterDto, body);
     const validationErrors = await validate(input);
@@ -48,9 +51,9 @@ export const Register = async (req: Request, res: Response) => {
     });
 
     res.send(user);
-};
+});
 
-export const Login = async (req: Request, res: Response) => {
+export const Login: any = asyncError(async (req: Request, res: Response) => {
     const body = req.body;
 
     const user = await myPrisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
@@ -74,11 +77,19 @@ export const Login = async (req: Request, res: Response) => {
     const rememberMe = body.rememberMe;
     const maxAge = rememberMe ? 365 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 1 year or 1 day
 
+    const adminLogin = req.path === "/api/admin/login";
+
+    if (user.is_user && adminLogin) {
+        return res.status(400).send({ message: "Unauthorized" });
+    }
+
     const { sign } = jwt;
     const token = sign(
-        { id: user.id },
-        process.env.JWT_SECRET,
-        { expiresIn: '1d' }
+        {
+            id: user.id,
+            scope: adminLogin ? "admin" : "user",
+        },
+        process.env.JWT_SECRET_ACCESS
     );
 
     res.cookie('user_session', token, {
@@ -89,69 +100,113 @@ export const Login = async (req: Request, res: Response) => {
     return res.send({
         message: "Successfully Logged In!"
     });
-};
+});
 
-export const AuthenticatedUser = async (req: Request, res: Response) => {
+export const AuthenticatedUser: any = asyncError(async (req: Request, res: Response) => {
     if (!req["user"]) {
         return res.status(401).send({ message: "Unauthenticated" });
     }
     const { password, ...user } = req["user"];
 
     res.send(user);
-};
+});
 
-export const Logout = async (req: Request, res: Response) => {
+export const Logout: any = asyncError(async (req: Request, res: Response) => {
     res.cookie('user_session', '', {
         maxAge: 0,
     });
     res.send({
         message: "Success"
     });
-};
+});
 
-export const UpdateInfo = async (req: Request, res: Response) => {
-    const user = req["user"];
+export const UpdateInfo = [
+    upload.single('profile_pic'),
+    asyncError(async (req: Request, res: Response) => {
+        const user = req["user"];
+        const body = req.body;
 
-    const body = req.body;
-    const input = plainToClass(UpdateInfoDTO, body);
-    const validationErrors = await validate(input);
+        const input = plainToClass(UpdateInfoDTO, body);
+        const validationErrors = await validate(input);
 
-    if (validationErrors.length > 0) {
-        return res.status(400).json(formatValidationErrors(validationErrors));
-    }
-
-    const existingUser = await myPrisma.user.findUnique({ where: { id: user.id } });
-
-    if (req.body.nama) {
-        existingUser.nama = req.body.nama;
-    }
-
-    if (req.body.email && req.body.email !== existingUser.email) {
-        const existingUserByEmail = await myPrisma.user.findUnique({ where: { email: req.body.email } });
-        if (existingUserByEmail) {
-            return res.status(409).send({ message: "Email already exists" });
+        if (validationErrors.length > 0) {
+            return res.status(400).json(formatValidationErrors(validationErrors));
         }
-        existingUser.email = req.body.email;
-    }
 
-    if (req.body.username && req.body.username !== existingUser.username) {
-        const existingUserByUsername = await myPrisma.user.findUnique({ where: { username: req.body.username } });
-        if (existingUserByUsername) {
-            return res.status(409).send({ message: "Username already exists" });
+        const existingUser = await myPrisma.user.findUnique({ where: { id: user.id } });
+
+        if (req.body.nama) {
+            existingUser.nama = req.body.nama;
         }
-        existingUser.username = req.body.username;
-    }
 
-    const updated = await myPrisma.user.update({
-        where: { id: user.id },
-        data: { ...existingUser }
-    });
+        if (req.body.email && req.body.email !== existingUser.email) {
+            const existingUserByEmail = await myPrisma.user.findUnique({ where: { email: req.body.email } });
+            if (existingUserByEmail) {
+                return res.status(409).send({ message: "Email already exists" });
+            }
+            existingUser.email = req.body.email;
+        }
 
-    const { password, ...data } = updated;
-    res.send(data);
-};
+        if (req.body.username && req.body.username !== existingUser.username) {
+            const existingUserByUsername = await myPrisma.user.findUnique({ where: { username: req.body.username } });
+            if (existingUserByUsername) {
+                return res.status(409).send({ message: "Username already exists" });
+            }
+            existingUser.username = req.body.username;
+        }
 
-export const UpdatePassword = async (req: Request, res: Response) => {
+        // Handle profile picture upload if it exists in the request
+        if (req.file) {
+            const fileName = `profile_pics/${user.id}_profile_pic_${Date.now()}.jpg`; // Unique filename based on user ID
+
+            // Delete existing profile picture if it's not the default image
+            if (existingUser.profile_pic && !existingUser.profile_pic.includes("user.png")) {
+                const oldFile = bucket.file(existingUser.profile_pic.split(`https://storage.googleapis.com/${bucket.name}/`)[1]);
+                await oldFile.delete().catch(() => {
+                    console.log("Old profile picture deletion failed, but continuing with the upload.");
+                });
+            }
+
+            const blob = bucket.file(fileName);
+            const blobStream = blob.createWriteStream({
+                resumable: false,
+                contentType: req.file.mimetype,
+            });
+
+            blobStream.on('error', (err) => {
+                console.error(err);
+                return res.status(500).json({ error: 'Failed to upload image' });
+            });
+
+            blobStream.on('finish', async () => {
+                const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+                existingUser.profile_pic = publicUrl;
+
+                // Update user info in the database
+                const updated = await myPrisma.user.update({
+                    where: { id: user.id },
+                    data: { ...existingUser },
+                });
+
+                const { password, ...data } = updated;
+                res.send(data);
+            });
+
+            blobStream.end(req.file.buffer);
+        } else {
+            // If no image, just update the user without profile_pic change
+            const updated = await myPrisma.user.update({
+                where: { id: user.id },
+                data: { ...existingUser },
+            });
+
+            const { password, ...data } = updated;
+            res.send(data);
+        }
+    })
+];
+
+export const UpdatePassword: any = asyncError(async (req: Request, res: Response) => {
     const user = req["user"];
     const body = req.body;
     const input = plainToClass(UpdatePasswordDTO, body);
@@ -169,4 +224,4 @@ export const UpdatePassword = async (req: Request, res: Response) => {
     const { password, ...data } = updated;
 
     res.send(data);
-};
+});

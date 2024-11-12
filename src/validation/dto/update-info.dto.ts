@@ -1,9 +1,9 @@
-import { IsString, Length, IsEmail, IsOptional, IsInt } from 'class-validator';
+import { IsString, Length, IsEmail, IsOptional } from 'class-validator';
 
 export class UpdateInfoDTO {
-    @IsString({ message: 'Full name must be a string' })
+    @IsString({ message: 'Nama must be a string' })
     @IsOptional()
-    fullname?: string;
+    nama?: string;
 
     @IsString()
     @IsOptional()
