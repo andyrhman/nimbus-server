@@ -8,9 +8,13 @@ import { myPrisma } from '../config/db.config';
 import { UpdatePasswordDTO } from '../validation/dto/update-password.dto';
 import { asyncError } from '../middleware/global-error.middleware';
 import { bucket, upload } from '../config/storage.config';
-import { v4 as uuidv4 } from 'uuid';
+import { generateRandom6DigitNumber } from '../utility/sixdigitnumber.utility';
 import jwt from 'jsonwebtoken';
+import transporter from '../config/transporter.config';
+import * as fs from "fs";
+import * as handlebars from "handlebars";
 import * as argon2 from 'argon2';
+import { TokenService } from '../service/token.service';
 
 export const Register: any = asyncError(async (req: Request, res: Response) => {
     const body = req.body;
@@ -206,8 +210,60 @@ export const UpdateInfo = [
     })
 ];
 
+export const SendPasswordToken: any = asyncError(async (req: Request, res: Response) => {
+    const body = req.body;
+
+    if (!body.email) {
+        return res.status(400).send({ message: "Provide your email address" });
+    }
+
+    const user = await myPrisma.user.findFirst({ where: { email: body.email } });
+
+    if (!user) {
+        return res.status(400).send({ message: "Email not found" });
+    }
+
+    const token = generateRandom6DigitNumber();
+
+    const tokenExpiresAt = Date.now() + 30 * 60 * 1000;
+
+    await myPrisma.token.create({
+        data: {
+            token,
+            email: user.email,
+            user_id: user.id,
+            expiresAt: tokenExpiresAt
+        }
+    });
+
+    const name = user.nama;
+
+    const source = fs
+        .readFileSync("src/templates/password-reset.hbs", "utf-8")
+        .toString();
+
+    const template = handlebars.compile(source);
+
+    const replacements = {
+        token,
+        name
+    };
+    const htmlToSend = template(replacements);
+
+    const options = {
+        from: "from@mail.com",
+        to: user.email,
+        subject: "Verify your email",
+        html: htmlToSend,
+    };
+
+    await transporter.sendMail(options);
+
+    res.status(200).send({ message: "Email has successfully sent" });
+
+});
+
 export const UpdatePassword: any = asyncError(async (req: Request, res: Response) => {
-    const user = req["user"];
     const body = req.body;
     const input = plainToClass(UpdatePasswordDTO, body);
     const validationErrors = await validate(input);
@@ -216,12 +272,37 @@ export const UpdatePassword: any = asyncError(async (req: Request, res: Response
         return res.status(400).json(formatValidationErrors(validationErrors));
     }
 
-    const updated = await myPrisma.user.update({
-        where: { id: user.id },
-        data: { password: await argon2.hash(req.body.password) }
+    const tokenRepository = new TokenService(myPrisma);
+
+    const userToken = await tokenRepository.findByTokenExpiresAt(body.token);
+
+    if (!userToken) {
+        return res.status(400).send({ message: "Invalid Token" });
+    }
+
+    if (userToken.used) {
+        return res
+            .status(400)
+            .send({ message: "Token has already been used" });
+    }
+
+    const user = await myPrisma.user.findFirst({
+        where: { email: userToken.email, id: userToken.user_id },
     });
 
-    const { password, ...data } = updated;
+    if (!user) {
+        return res.status(400).send({ message: "User not found" });
+    }
 
-    res.send(data);
+    if (user.email !== userToken.email && user.id !== userToken.user_id) {
+        return res.status(400).send({ message: "Invalid Verify ID or email" });
+    }
+
+    await myPrisma.token.update({ where: { id: userToken.id }, data: { used: true } });
+    await myPrisma.user.update({
+        where: { id: user.id },
+        data: { password: await argon2.hash(body.password) }
+    });
+
+    res.send({ message: "Password Successfully Updated" });
 });

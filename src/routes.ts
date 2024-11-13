@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { AuthenticatedUser, Login, Logout, Register, UpdateInfo, UpdatePassword } from "./controllers/auth.controller";
+import { AuthenticatedUser, Login, Logout, Register, SendPasswordToken, UpdateInfo, UpdatePassword } from "./controllers/auth.controller";
 import { AuthMiddleware } from "./middleware/auth.middleware";
 
 export const routes = (router: Router) => {
@@ -11,5 +11,6 @@ export const routes = (router: Router) => {
     router.get('/api/user', AuthMiddleware, AuthenticatedUser);
     router.post('/api/logout', AuthMiddleware, Logout);
     router.put('/api/user/info', AuthMiddleware, UpdateInfo);
+    router.post('/api/user/send-password-token', AuthMiddleware, SendPasswordToken);
     router.put('/api/user/password', AuthMiddleware, UpdatePassword);
 };
