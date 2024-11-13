@@ -11,7 +11,9 @@ export const CreateCategoryWisata: any = asyncError(async (req: Request, res: Re
             nama: req.body.nama,
             thumbnail: req.body.thumbnail
         }
-    })
+    });
+
+    res.send(category_wisata)
 });
 
 export const GetCategoryWisata: any = asyncError(async (req: Request, res: Response) => {
