@@ -9,12 +9,12 @@ import { UpdatePasswordDTO } from '../validation/dto/update-password.dto';
 import { asyncError } from '../middleware/global-error.middleware';
 import { bucket, upload } from '../config/storage.config';
 import { generateRandom6DigitNumber } from '../utility/sixdigitnumber.utility';
+import { TokenService } from '../service/token.service';
 import jwt from 'jsonwebtoken';
 import transporter from '../config/transporter.config';
 import * as fs from "fs";
 import * as handlebars from "handlebars";
 import * as argon2 from 'argon2';
-import { TokenService } from '../service/token.service';
 
 export const Register: any = asyncError(async (req: Request, res: Response) => {
     const body = req.body;

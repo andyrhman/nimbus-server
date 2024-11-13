@@ -14,26 +14,69 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  nama String
-  username String @unique
-  email String @unique
-  profile_pic String @default("https://storage.googleapis.com/nimbus-storage/profile_pics/user.png")
-  password String
-  is_user Boolean @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  token Token[]
+  id          Int      @id @default(autoincrement())
+  nama        String
+  username    String   @unique
+  email       String   @unique
+  profile_pic String   @default("https://storage.googleapis.com/nimbus-storage/profile_pics/user.png")
+  password    String
+  is_user     Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  token       Token[]
+
   @@map("users")
 }
 
 model Token {
-  id Int @id @default(autoincrement())
-  email String
-  token String
+  id        Int     @id @default(autoincrement())
+  email     String
+  token     String
   expiresAt BigInt
-  used Boolean @default(false)
-  user_id Int
-  user User @relation(fields: [user_id], references: [id])
+  used      Boolean @default(false)
+  user_id   Int
+  user      User    @relation(fields: [user_id], references: [id])
+
   @@map("user_token")
+}
+
+model TempatWisata {
+  id                Int                   @id @default(autoincrement())
+  nama              String
+  deskripsi         String                @db.Text
+  rating            Int
+  provinsi_id       Int
+  provinsi          Provinsi              @relation(fields: [provinsi_id], references: [id])
+  categoryWisata_id Int
+  categoryWisata    CategoryWisata        @relation(fields: [categoryWisata_id], references: [id])
+  gambar            TempatWisataPicture[]
+
+  @@map("tempat_wisata")
+}
+
+model TempatWisataPicture {
+  id              Int          @id @default(autoincrement())
+  picture         String
+  tempatWisata_id Int
+  tempatWisata    TempatWisata @relation(fields: [tempatWisata_id], references: [id])
+
+  @@map("tempat_wisata_gambar")
+}
+
+model Provinsi {
+  id           Int            @id @default(autoincrement())
+  nama         String
+  thumbnail    String
+  tempatWisata TempatWisata[]
+
+  @@map("provinsi")
+}
+
+model CategoryWisata {
+  id           Int            @id @default(autoincrement())
+  nama         String
+  thumbnail    String
+  tempatWisata TempatWisata[]
+
+  @@map("category_wisata")
 }
