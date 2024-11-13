@@ -84,7 +84,7 @@ export const Login: any = asyncError(async (req: Request, res: Response) => {
     const adminLogin = req.path === "/api/admin/login";
 
     if (user.is_user && adminLogin) {
-        return res.status(400).send({ message: "Unauthorized" });
+        return res.status(403).send({ message: "Unauthorized" });
     }
 
     const { sign } = jwt;

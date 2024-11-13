@@ -44,23 +44,14 @@ model TempatWisata {
   id                Int                   @id @default(autoincrement())
   nama              String
   deskripsi         String                @db.Text
+  thumbnail         String
   rating            Int
   provinsi_id       Int
   provinsi          Provinsi              @relation(fields: [provinsi_id], references: [id])
   categoryWisata_id Int
   categoryWisata    CategoryWisata        @relation(fields: [categoryWisata_id], references: [id])
-  gambar            TempatWisataPicture[]
 
   @@map("tempat_wisata")
-}
-
-model TempatWisataPicture {
-  id              Int          @id @default(autoincrement())
-  picture         String
-  tempatWisata_id Int
-  tempatWisata    TempatWisata @relation(fields: [tempatWisata_id], references: [id])
-
-  @@map("tempat_wisata_gambar")
 }
 
 model Provinsi {
@@ -79,4 +70,9 @@ model CategoryWisata {
   tempatWisata TempatWisata[]
 
   @@map("category_wisata")
+}
+
+model Test {
+  id   Int    @id @default(autoincrement())
+  nama String
 }
