@@ -42,8 +42,8 @@ export const routes = (router: Router) => {
 
     // * Tempat Wisata
     router.get('/api/tempat-wisata', GetAllTempatWisata);
-    router.get('/api/tempat-wisata/:provinsi', GetAllTempatWisataProvinsi);
-    router.get('/api/tempat-wisata/:category_wisata', GetAllTempatWisataCategory);
+    router.get('/api/tempat-wisata/provinsi/:provinsi', GetAllTempatWisataProvinsi);
+    router.get('/api/tempat-wisata/category/:category_wisata', GetAllTempatWisataCategory);
     router.post('/api/admin/tempat-wisata', AuthMiddleware, CreateTempatWisata);
     router.get('/api/admin/tempat-wisata/:id', AuthMiddleware, GetTempatWisata);
     router.put('/api/admin/tempat-wisata/:id', AuthMiddleware, UpdateTempatWisata);

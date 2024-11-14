@@ -1,5 +1,5 @@
 import { ValidationError } from "class-validator";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 
 export const ValidationMiddleware: any = (
   err: any,
@@ -23,3 +23,10 @@ export const ValidationMiddleware: any = (
 
   return next(err);
 };
+
+export function validateFile(req: Request, res: Response, next: NextFunction) {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Thumbnail file is required' });
+  }
+  next();
+}

@@ -8,34 +8,122 @@ import { CreateTempatWisataDTO } from '../validation/dto/create-tw.dto';
 import { bucket, upload } from '../config/storage.config';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateTempatWisataDTO } from '../validation/dto/update-tw.dto';
+import { validateFile } from '../middleware/validation.middleware';
+import { capitalizeFirstLetter } from '../utility/firstLetterCap.utility';
 
 export const GetAllTempatWisata = asyncError(async (req: Request, res: Response) => {
-    const tempatWisata = await myPrisma.tempatWisata.findMany();
+    let searchQuery = req.query.search?.toString().toLowerCase();
+    if (searchQuery) {
+        searchQuery = capitalizeFirstLetter(searchQuery);
+    }
+
+    const tempatWisata = await myPrisma.tempatWisata.findMany({
+        where: {
+            OR: [
+                {
+                    nama: {
+                        contains: searchQuery,
+                        mode: "insensitive"
+                    }
+                },
+                {
+                    provinsi: {
+                        nama: {
+                            contains: searchQuery,
+                            mode: "insensitive"
+                        }
+                    }
+                },
+                {
+                    categoryWisata: {
+                        nama: {
+                            contains: searchQuery,
+                            mode: "insensitive"
+                        }
+                    }
+                }
+            ]
+        },
+        include: {
+            provinsi: true,
+            categoryWisata: true
+        }
+    });
+
+    if (tempatWisata.length === 0) {
+        return res
+            .status(404)
+            .json({ message: `No results found for "${searchQuery}".` });
+    }
+
     res.send(tempatWisata);
 });
 
 export const GetAllTempatWisataProvinsi = asyncError(async (req: Request, res: Response) => {
-    const tempatWisata = await myPrisma.provinsi.findMany({
+    let provinsi = await myPrisma.provinsi.findMany({
         where: { nama: req.params.provinsi },
         include: {
             tempatWisata: true
         }
     });
-    res.send(tempatWisata);
+    if (req.query.search) {
+        const search = capitalizeFirstLetter(req.query.search.toString().toLowerCase());
+
+        provinsi = provinsi.map((p) => {
+            const filteredTempatWisata = p.tempatWisata.filter((tw) =>
+                tw.nama.toLowerCase().includes(search)
+            );
+
+            return {
+                ...p,
+                tempatWisata: filteredTempatWisata
+            };
+        }).filter(p => p.tempatWisata.length > 0);
+
+        if (provinsi.length === 0) {
+            return res
+                .status(404)
+                .json({ message: `No ${search} matching your search criteria.` });
+        }
+    }
+
+    res.send(provinsi);
 });
 
 export const GetAllTempatWisataCategory = asyncError(async (req: Request, res: Response) => {
-    const tempatWisata = await myPrisma.categoryWisata.findMany({
+    let twCategory = await myPrisma.categoryWisata.findMany({
         where: { nama: req.params.category_wisata },
         include: {
             tempatWisata: true
         }
     });
-    res.send(tempatWisata);
+
+    if (req.query.search) {
+        const search = capitalizeFirstLetter(req.query.search.toString().toLowerCase());
+
+        twCategory = twCategory.map((twC) => {
+            const filteredTempatWisata = twC.tempatWisata.filter((tw) =>
+                tw.nama.toLowerCase().includes(search)
+            );
+
+            return {
+                ...twC,
+                tempatWisata: filteredTempatWisata
+            };
+        }).filter(twC => twC.tempatWisata.length > 0);
+
+        if (twCategory.length === 0) {
+            return res
+                .status(404)
+                .json({ message: `No ${search} matching your search criteria.` });
+        }
+    }
+    res.send(twCategory);
 });
 
 export const CreateTempatWisata = [
     upload.single('thumbnail'),
+    validateFile,
     asyncError(async (req: Request, res: Response) => {
         const body = req.body;
         const input = plainToClass(CreateTempatWisataDTO, body);
@@ -74,7 +162,13 @@ export const CreateTempatWisata = [
                 nama: body.nama,
                 deskripsi: body.deskripsi,
                 thumbnail: thumbnailUrl,
-                rating: Number(body.rating),
+                review_total: body.review_total,
+                alamat: body.alamat,
+                website: body.website,
+                google_link: body.google_link,
+                longitude: body.longitude,
+                latitude: body.latitude,
+                average_rating: body.average_rating,
                 provinsi_id: Number(body.provinsi_id),
                 categoryWisata_id: Number(body.categoryWisata_id),
             },
@@ -152,9 +246,15 @@ export const UpdateTempatWisata = [
                 nama: body.nama || existingTempatWisata.nama,
                 deskripsi: body.deskripsi || existingTempatWisata.deskripsi,
                 thumbnail: thumbnailUrl,
-                rating: body.rating || existingTempatWisata.rating,
-                provinsi_id: body.provinsi_id || existingTempatWisata.provinsi_id,
-                categoryWisata_id: body.categoryWisata_id || existingTempatWisata.categoryWisata_id,
+                review_total: body.review_total || existingTempatWisata.review_total,
+                alamat: body.alamat || existingTempatWisata.alamat,
+                website: body.website || existingTempatWisata.website,
+                google_link: body.google_link || existingTempatWisata.google_link,
+                longitude: body.longitude || existingTempatWisata.longitude,
+                latitude: body.latitude || existingTempatWisata.latitude,
+                average_rating: body.rating || existingTempatWisata.average_rating,
+                provinsi_id: Number(body.provinsi_id) || existingTempatWisata.provinsi_id,
+                categoryWisata_id: Number(body.categoryWisata_id) || existingTempatWisata.categoryWisata_id,
             },
         });
 

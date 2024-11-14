@@ -41,15 +41,21 @@ model Token {
 }
 
 model TempatWisata {
-  id                Int                   @id @default(autoincrement())
+  id                Int            @id @default(autoincrement())
   nama              String
-  deskripsi         String                @db.Text
+  alamat            String
+  website           String
+  google_link       String
+  longitude         String
+  latitude          String
+  deskripsi         String         @db.Text
   thumbnail         String
-  rating            Int
+  review_total      String
+  average_rating    String
   provinsi_id       Int
-  provinsi          Provinsi              @relation(fields: [provinsi_id], references: [id])
+  provinsi          Provinsi       @relation(fields: [provinsi_id], references: [id])
   categoryWisata_id Int
-  categoryWisata    CategoryWisata        @relation(fields: [categoryWisata_id], references: [id])
+  categoryWisata    CategoryWisata @relation(fields: [categoryWisata_id], references: [id])
 
   @@map("tempat_wisata")
 }
