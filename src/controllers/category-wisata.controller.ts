@@ -3,9 +3,8 @@ import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { formatValidationErrors } from '../utility/validation.utility';
 import { myPrisma } from '../config/db.config';
-import { asyncError } from '../middleware/global-error.middleware';
 
-export const CreateCategoryWisata: any = asyncError(async (req: Request, res: Response) => {
+export const CreateCategoryWisata: any = async (req: Request, res: Response) => {
     const category_wisata = await myPrisma.categoryWisata.create({
         data: {
             nama: req.body.nama,
@@ -13,17 +12,17 @@ export const CreateCategoryWisata: any = asyncError(async (req: Request, res: Re
         }
     });
 
-    res.send(category_wisata)
-});
+    res.send(category_wisata);
+};
 
-export const GetCategoryWisata: any = asyncError(async (req: Request, res: Response) => {
+export const GetCategoryWisata: any = async (req: Request, res: Response) => {
 
-});
+};
 
-export const UpdateCategoryWisata: any = asyncError(async (req: Request, res: Response) => {
+export const UpdateCategoryWisata: any = async (req: Request, res: Response) => {
 
-});
+};
 
-export const DeleteCategoryWisata: any = asyncError(async (req: Request, res: Response) => {
+export const DeleteCategoryWisata: any = async (req: Request, res: Response) => {
 
-});
+};

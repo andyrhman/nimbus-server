@@ -1,4 +1,6 @@
+import dotenv from 'dotenv';
 import { Request, Response, NextFunction } from "express";
+dotenv.config();
 
 interface CustomError extends Error {
     statusCode?: number;
@@ -22,5 +24,5 @@ export const errorMiddleware = (
 export const asyncError: any = (
     passedFunc: (req: Request, res: Response, next: NextFunction) => Promise<void>
 ) => (req: Request, res: Response, next: NextFunction): void => {
-    Promise.resolve(passedFunc(req, res, next)).catch(next);
+    if (process.env.NODE_ENV === 'development') Promise.resolve(passedFunc(req, res, next)).catch(next);
 };

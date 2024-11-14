@@ -11,7 +11,7 @@ import { UpdateTempatWisataDTO } from '../validation/dto/update-tw.dto';
 import { validateFile } from '../middleware/validation.middleware';
 import { capitalizeFirstLetter } from '../utility/firstLetterCap.utility';
 
-export const GetAllTempatWisata = asyncError(async (req: Request, res: Response) => {
+export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
     let searchQuery = req.query.search?.toString().toLowerCase();
     if (searchQuery) {
         searchQuery = capitalizeFirstLetter(searchQuery);
@@ -57,9 +57,9 @@ export const GetAllTempatWisata = asyncError(async (req: Request, res: Response)
     }
 
     res.send(tempatWisata);
-});
+};
 
-export const GetAllTempatWisataProvinsi = asyncError(async (req: Request, res: Response) => {
+export const GetAllTempatWisataProvinsi: any = async (req: Request, res: Response) => {
     let provinsi = await myPrisma.provinsi.findMany({
         where: { nama: req.params.provinsi },
         include: {
@@ -88,9 +88,9 @@ export const GetAllTempatWisataProvinsi = asyncError(async (req: Request, res: R
     }
 
     res.send(provinsi);
-});
+};
 
-export const GetAllTempatWisataCategory = asyncError(async (req: Request, res: Response) => {
+export const GetAllTempatWisataCategory: any = async (req: Request, res: Response) => {
     let twCategory = await myPrisma.categoryWisata.findMany({
         where: { nama: req.params.category_wisata },
         include: {
@@ -119,7 +119,7 @@ export const GetAllTempatWisataCategory = asyncError(async (req: Request, res: R
         }
     }
     res.send(twCategory);
-});
+};
 
 export const CreateTempatWisata = [
     upload.single('thumbnail'),
@@ -178,7 +178,7 @@ export const CreateTempatWisata = [
     }),
 ];
 
-export const GetTempatWisata = asyncError(async (req: Request, res: Response) => {
+export const GetTempatWisata: any = async (req: Request, res: Response) => {
     res.send(await myPrisma.tempatWisata.findUnique({
         where: {
             id: Number(req.params.id)
@@ -188,7 +188,7 @@ export const GetTempatWisata = asyncError(async (req: Request, res: Response) =>
             categoryWisata: true
         }
     }));
-});
+};
 
 export const UpdateTempatWisata = [
     upload.single('thumbnail'),
@@ -262,7 +262,7 @@ export const UpdateTempatWisata = [
     }),
 ];
 
-export const DeleteTempatWisata = asyncError(async (req: Request, res: Response) => {
+export const DeleteTempatWisata: any = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const existingTempatWisata = await myPrisma.tempatWisata.findUnique({ where: { id: Number(id) } });
@@ -285,4 +285,4 @@ export const DeleteTempatWisata = asyncError(async (req: Request, res: Response)
     await myPrisma.tempatWisata.delete({ where: { id: Number(id) } });
 
     res.status(204).json(null);
-});
+};

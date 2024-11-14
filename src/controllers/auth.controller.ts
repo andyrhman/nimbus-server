@@ -16,7 +16,7 @@ import * as fs from "fs";
 import * as handlebars from "handlebars";
 import * as argon2 from 'argon2';
 
-export const Register: any = asyncError(async (req: Request, res: Response) => {
+export const Register: any = async (req: Request, res: Response) => {
     const body = req.body;
     const input = plainToClass(RegisterDto, body);
     const validationErrors = await validate(input);
@@ -55,9 +55,9 @@ export const Register: any = asyncError(async (req: Request, res: Response) => {
     });
 
     res.send(user);
-});
+};
 
-export const Login: any = asyncError(async (req: Request, res: Response) => {
+export const Login: any = async (req: Request, res: Response) => {
     const body = req.body;
 
     const user = await myPrisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
@@ -104,25 +104,25 @@ export const Login: any = asyncError(async (req: Request, res: Response) => {
     return res.send({
         message: "Successfully Logged In!"
     });
-});
+};
 
-export const AuthenticatedUser: any = asyncError(async (req: Request, res: Response) => {
+export const AuthenticatedUser: any = async (req: Request, res: Response) => {
     if (!req["user"]) {
         return res.status(401).send({ message: "Unauthenticated" });
     }
     const { password, ...user } = req["user"];
 
     res.send(user);
-});
+};
 
-export const Logout: any = asyncError(async (req: Request, res: Response) => {
+export const Logout: any = async (req: Request, res: Response) => {
     res.cookie('user_session', '', {
         maxAge: 0,
     });
     res.send({
         message: "Success"
     });
-});
+};
 
 export const UpdateInfo = [
     upload.single('profile_pic'),
@@ -210,7 +210,7 @@ export const UpdateInfo = [
     })
 ];
 
-export const SendPasswordToken: any = asyncError(async (req: Request, res: Response) => {
+export const SendPasswordToken: any = async (req: Request, res: Response) => {
     const body = req.body;
 
     if (!body.email) {
@@ -261,9 +261,9 @@ export const SendPasswordToken: any = asyncError(async (req: Request, res: Respo
 
     res.status(200).send({ message: "Email has successfully sent" });
 
-});
+};
 
-export const UpdatePassword: any = asyncError(async (req: Request, res: Response) => {
+export const UpdatePassword: any = async (req: Request, res: Response) => {
     const body = req.body;
     const input = plainToClass(UpdatePasswordDTO, body);
     const validationErrors = await validate(input);
@@ -305,4 +305,4 @@ export const UpdatePassword: any = asyncError(async (req: Request, res: Response
     });
 
     res.send({ message: "Password Successfully Updated" });
-});
+};

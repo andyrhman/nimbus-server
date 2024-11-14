@@ -14,16 +14,18 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  nama        String
-  username    String   @unique
-  email       String   @unique
-  profile_pic String   @default("https://storage.googleapis.com/nimbus-storage/profile_pics/user.png")
-  password    String
-  is_user     Boolean  @default(true)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  token       Token[]
+  id                  Int                   @id @default(autoincrement())
+  nama                String
+  username            String                @unique
+  email               String                @unique
+  profile_pic         String                @default("https://storage.googleapis.com/nimbus-storage/profile_pics/user.png")
+  password            String
+  is_user             Boolean               @default(true)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  token               Token[]
+  perencanaanManual   PerencanaanManual[]
+  perencanaanOtomatis PerencanaanOtomatis[]
 
   @@map("users")
 }
@@ -41,44 +43,88 @@ model Token {
 }
 
 model TempatWisata {
-  id                Int            @id @default(autoincrement())
-  nama              String
-  alamat            String
-  website           String
-  google_link       String
-  longitude         String
-  latitude          String
-  deskripsi         String         @db.Text
-  thumbnail         String
-  review_total      String
-  average_rating    String
-  provinsi_id       Int
-  provinsi          Provinsi       @relation(fields: [provinsi_id], references: [id])
-  categoryWisata_id Int
-  categoryWisata    CategoryWisata @relation(fields: [categoryWisata_id], references: [id])
+  id                            Int                             @id @default(autoincrement())
+  nama                          String
+  alamat                        String
+  website                       String
+  google_link                   String
+  longitude                     String
+  latitude                      String
+  deskripsi                     String                          @db.Text
+  thumbnail                     String
+  review_total                  String
+  average_rating                String
+  provinsi_id                   Int
+  provinsi                      Provinsi                        @relation(fields: [provinsi_id], references: [id])
+  categoryWisata_id             Int
+  categoryWisata                CategoryWisata                  @relation(fields: [categoryWisata_id], references: [id])
+  TempatWisataPerencanaanManual TempatWisataPerencanaanManual[]
+  perencanaanOtomatis           PerencanaanOtomatis[]
 
   @@map("tempat_wisata")
 }
 
 model Provinsi {
-  id           Int            @id @default(autoincrement())
+  id           Int                   @id @default(autoincrement())
   nama         String
   thumbnail    String
   tempatWisata TempatWisata[]
+  perencanaan  PerencanaanOtomatis[]
 
   @@map("provinsi")
 }
 
 model CategoryWisata {
-  id           Int            @id @default(autoincrement())
-  nama         String
-  thumbnail    String
-  tempatWisata TempatWisata[]
+  id                  Int                   @id @default(autoincrement())
+  nama                String
+  thumbnail           String
+  tempatWisata        TempatWisata[]
+  PerencanaanOtomatis PerencanaanOtomatis[]
 
   @@map("category_wisata")
 }
 
+model PerencanaanManual {
+  id                            Int                             @id @default(autoincrement())
+  nama                          String
+  budget                        String
+  user_id                       Int
+  user                          User                            @relation(fields: [user_id], references: [id])
+  TempatWisataPerencanaanManual TempatWisataPerencanaanManual[]
+
+  @@map("perencanaan_manual")
+}
+
+model TempatWisataPerencanaanManual {
+  id                   Int               @id @default(autoincrement())
+  tanggal_perencanaan  DateTime
+  perencanaanManual_id Int
+  perencanaanManual    PerencanaanManual @relation(fields: [perencanaanManual_id], references: [id])
+  tempatWisata_id      Int
+  tempatWisata         TempatWisata      @relation(fields: [tempatWisata_id], references: [id])
+
+  @@map("tempatWisata_perencanaan_manual")
+}
+
+model PerencanaanOtomatis {
+  id                Int            @id @default(autoincrement())
+  nama              String
+  budget            String
+  tanggal_perencaan DateTime
+  user_id           Int
+  User              User           @relation(fields: [user_id], references: [id])
+  provinsi_id       Int
+  provinsi          Provinsi       @relation(fields: [provinsi_id], references: [id])
+  categoryWisata_id Int
+  categoryWisata    CategoryWisata @relation(fields: [categoryWisata_id], references: [id])
+  tempatWisata_id   Int
+  tempatWisata      TempatWisata   @relation(fields: [tempatWisata_id], references: [id])
+
+  @@map("perencanaan_otomatis")
+}
+
 model Test {
-  id   Int    @id @default(autoincrement())
-  nama String
+  id        Int    @id @default(autoincrement())
+  nama      String
+  deskripsi String
 }

@@ -4,6 +4,7 @@ import { AuthMiddleware } from "./middleware/auth.middleware";
 import { CreateProvinsi, DeleteProvinsi, GetProvinsi, UpdateProvinsi } from "./controllers/provinsi.controller";
 import { CreateCategoryWisata, DeleteCategoryWisata, GetCategoryWisata, UpdateCategoryWisata } from "./controllers/category-wisata.controller";
 import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetTempatWisata, UpdateTempatWisata } from "./controllers/tempat-wisata.controller";
+import { CreateRencanaManual, GetRencanaUser } from "./controllers/rencana-manual.controller";
 
 export const routes = (router: Router) => {
     // * Health Check
@@ -49,4 +50,7 @@ export const routes = (router: Router) => {
     router.put('/api/admin/tempat-wisata/:id', AuthMiddleware, UpdateTempatWisata);
     router.delete('/api/admin/tempat-wisata/:id', AuthMiddleware, DeleteTempatWisata);
 
+    // * Perencanaan
+    router.get('/api/user/rencanaku', AuthMiddleware, GetRencanaUser);
+    router.post('/api/user/rencana-manual', AuthMiddleware, CreateRencanaManual);
 };
