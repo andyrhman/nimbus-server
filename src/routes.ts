@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
 import { AuthenticatedUser, Login, Logout, Register, SendPasswordToken, UpdateInfo, UpdatePassword } from "./controllers/auth.controller";
 import { AuthMiddleware } from "./middleware/auth.middleware";
-import { CreateProvinsi, DeleteProvinsi, GetProvinsi, UpdateProvinsi } from "./controllers/provinsi.controller";
-import { CreateCategoryWisata, DeleteCategoryWisata, GetCategoryWisata, UpdateCategoryWisata } from "./controllers/category-wisata.controller";
+import { CreateProvinsi, DeleteProvinsi, GetAllProvinsi, GetProvinsi, UpdateProvinsi } from "./controllers/provinsi.controller";
+import { CreateCategoryWisata, DeleteCategoryWisata, GetAllCategoryWisata, GetCategoryWisata, UpdateCategoryWisata } from "./controllers/category-wisata.controller";
 import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetTempatWisata, UpdateTempatWisata } from "./controllers/tempat-wisata.controller";
 import { CreateRencanaManual, CreateRencanaTempatWisataManual, DeleteRencanaManual, DeleteRencanaTempatWisataManual, GetRencanaUserManual } from "./controllers/rencana-manual.controller";
 import { CreateRencanaOtomatis, GetRencanaUserOtomatis, CreateRencanaTempatWisataOtomatis, DeleteRencanaOtomatis, DeleteRencanaTempatWisataOtomatis } from "./controllers/rencana-otomatis.controller";
@@ -29,23 +29,24 @@ export const routes = (router: Router) => {
     router.put('/api/admin/password', AuthMiddleware, UpdatePassword);
 
     // * Provinsi
-    router.get('/api/provinsi');
+    router.get('/api/user/provinsi', GetAllProvinsi);
     router.post('/api/admin/provinsi', AuthMiddleware, CreateProvinsi);
     router.get('/api/provinsi/:id', AuthMiddleware, GetProvinsi);
     router.put('/api/provinsi/:id', AuthMiddleware, UpdateProvinsi);
     router.delete('/api/provinsi/:id', AuthMiddleware, DeleteProvinsi);
 
     // * Category Wisata
-    router.get('/api/provinsi');
+    router.get('/api/user/category-wisata', GetAllCategoryWisata);
     router.post('/api/admin/category-wisata', AuthMiddleware, CreateCategoryWisata);
     router.get('/api/admin/category-wisata/:id', AuthMiddleware, GetCategoryWisata);
     router.put('/api/admin/category-wisata/:id', AuthMiddleware, UpdateCategoryWisata);
     router.delete('/api/admin/category-wisata/:id', AuthMiddleware, DeleteCategoryWisata);
 
     // * Tempat Wisata
-    router.get('/api/tempat-wisata', GetAllTempatWisata);
-    router.get('/api/tempat-wisata/provinsi/:provinsi', GetAllTempatWisataProvinsi);
-    router.get('/api/tempat-wisata/category/:category_wisata', GetAllTempatWisataCategory);
+    router.get('/api/user/tempat-wisata', GetAllTempatWisata);
+    router.get('/api/user/tempat-wisata/:id', GetTempatWisata);
+    router.get('/api/user/tempat-wisata/provinsi/:provinsi', GetAllTempatWisataProvinsi);
+    router.get('/api/user/tempat-wisata/category/:category_wisata', GetAllTempatWisataCategory);
     router.post('/api/admin/tempat-wisata', AuthMiddleware, CreateTempatWisata);
     router.get('/api/admin/tempat-wisata/:id', AuthMiddleware, GetTempatWisata);
     router.put('/api/admin/tempat-wisata/:id', AuthMiddleware, UpdateTempatWisata);

@@ -65,11 +65,12 @@ model TempatWisata {
 }
 
 model Provinsi {
-  id           Int                   @id @default(autoincrement())
-  nama         String
-  thumbnail    String
-  tempatWisata TempatWisata[]
-  perencanaan  PerencanaanOtomatis[]
+  id                Int                   @id @default(autoincrement())
+  nama              String
+  thumbnail         String
+  tempatWisata      TempatWisata[]
+  perencanaanManual PerencanaanManual[]
+  perencanaan       PerencanaanOtomatis[]
 
   @@map("provinsi")
 }
@@ -79,6 +80,7 @@ model CategoryWisata {
   nama                String
   thumbnail           String
   tempatWisata        TempatWisata[]
+  perencanaanManual   PerencanaanManual[]
   PerencanaanOtomatis PerencanaanOtomatis[]
 
   @@map("category_wisata")
@@ -90,6 +92,10 @@ model PerencanaanManual {
   budget                String
   user_id               Int
   user                  User                            @relation(fields: [user_id], references: [id])
+  provinsi_id           Int
+  provinsi              Provinsi                        @relation(fields: [provinsi_id], references: [id])
+  categoryWisata_id     Int
+  categoryWisata        CategoryWisata                  @relation(fields: [categoryWisata_id], references: [id])
   tw_perencanaan_manual TempatWisataPerencanaanManual[]
 
   @@map("perencanaan_manual")

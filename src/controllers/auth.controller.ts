@@ -124,9 +124,9 @@ export const Logout: any = async (req: Request, res: Response) => {
     });
 };
 
-export const UpdateInfo = [
+export const UpdateInfo: any = [
     upload.single('profile_pic'),
-    asyncError(async (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const user = req["user"];
         const body = req.body;
 
@@ -207,7 +207,7 @@ export const UpdateInfo = [
             const { password, ...data } = updated;
             res.send(data);
         }
-    })
+    }
 ];
 
 export const SendPasswordToken: any = async (req: Request, res: Response) => {

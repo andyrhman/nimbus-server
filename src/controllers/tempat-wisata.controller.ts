@@ -121,10 +121,10 @@ export const GetAllTempatWisataCategory: any = async (req: Request, res: Respons
     res.send(twCategory);
 };
 
-export const CreateTempatWisata = [
+export const CreateTempatWisata: any = [
     upload.single('thumbnail'),
     validateFile,
-    asyncError(async (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const body = req.body;
         const input = plainToClass(CreateTempatWisataDTO, body);
         const validationErrors = await validate(input);
@@ -175,7 +175,7 @@ export const CreateTempatWisata = [
         });
 
         res.send(tempatWisata);
-    }),
+    }
 ];
 
 export const GetTempatWisata: any = async (req: Request, res: Response) => {
@@ -190,9 +190,9 @@ export const GetTempatWisata: any = async (req: Request, res: Response) => {
     }));
 };
 
-export const UpdateTempatWisata = [
+export const UpdateTempatWisata: any = [
     upload.single('thumbnail'),
-    asyncError(async (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const { id } = req.params;
         const body = req.body;
         const input = plainToClass(UpdateTempatWisataDTO, body);
@@ -259,7 +259,7 @@ export const UpdateTempatWisata = [
         });
 
         res.send(updatedTempatWisata);
-    }),
+    }
 ];
 
 export const DeleteTempatWisata: any = async (req: Request, res: Response) => {

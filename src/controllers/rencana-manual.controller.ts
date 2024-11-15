@@ -14,7 +14,9 @@ export const GetRencanaUserManual: any = async (req: Request, res: Response) => 
                 include: {
                     tempatWisata: true
                 }
-            }
+            },
+            provinsi: true,
+            categoryWisata: true
         }
     });
     if (!rencanaku) return res.status(403).send({ message: "Not Allowed!" });
@@ -29,7 +31,9 @@ export const CreateRencanaManual = async (req: Request, res: Response) => {
         data: {
             nama: body.nama,
             budget: body.budget,
-            user_id: user.id
+            user_id: user.id,
+            provinsi_id: body.provinsi_id,
+            categoryWisata_id: body.categoryWisata_id
         }
     });
 
