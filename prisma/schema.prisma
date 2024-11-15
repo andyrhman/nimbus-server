@@ -43,23 +43,23 @@ model Token {
 }
 
 model TempatWisata {
-  id                            Int                             @id @default(autoincrement())
-  nama                          String
-  alamat                        String
-  website                       String
-  google_link                   String
-  longitude                     String
-  latitude                      String
-  deskripsi                     String                          @db.Text
-  thumbnail                     String
-  review_total                  String
-  average_rating                String
-  provinsi_id                   Int
-  provinsi                      Provinsi                        @relation(fields: [provinsi_id], references: [id])
-  categoryWisata_id             Int
-  categoryWisata                CategoryWisata                  @relation(fields: [categoryWisata_id], references: [id])
-  TempatWisataPerencanaanManual TempatWisataPerencanaanManual[]
-  perencanaanOtomatis           PerencanaanOtomatis[]
+  id                              Int                               @id @default(autoincrement())
+  nama                            String
+  alamat                          String
+  website                         String
+  google_link                     String
+  longitude                       String
+  latitude                        String
+  deskripsi                       String                            @db.Text
+  thumbnail                       String
+  review_total                    String
+  average_rating                  String
+  provinsi_id                     Int
+  provinsi                        Provinsi                          @relation(fields: [provinsi_id], references: [id])
+  categoryWisata_id               Int
+  categoryWisata                  CategoryWisata                    @relation(fields: [categoryWisata_id], references: [id])
+  TempatWisataPerencanaanManual   TempatWisataPerencanaanManual[]
+  TempatWisataPerencanaanOtomatis TempatWisataPerencanaanOtomatis[]
 
   @@map("tempat_wisata")
 }
@@ -107,20 +107,29 @@ model TempatWisataPerencanaanManual {
 }
 
 model PerencanaanOtomatis {
-  id                Int            @id @default(autoincrement())
-  nama              String
-  budget            String
-  tanggal_perencaan DateTime
-  user_id           Int
-  User              User           @relation(fields: [user_id], references: [id])
-  provinsi_id       Int
-  provinsi          Provinsi       @relation(fields: [provinsi_id], references: [id])
-  categoryWisata_id Int
-  categoryWisata    CategoryWisata @relation(fields: [categoryWisata_id], references: [id])
-  tempatWisata_id   Int
-  tempatWisata      TempatWisata   @relation(fields: [tempatWisata_id], references: [id])
+  id                      Int                               @id @default(autoincrement())
+  nama                    String
+  budget                  String
+  user_id                 Int
+  User                    User                              @relation(fields: [user_id], references: [id])
+  provinsi_id             Int
+  provinsi                Provinsi                          @relation(fields: [provinsi_id], references: [id])
+  categoryWisata_id       Int
+  categoryWisata          CategoryWisata                    @relation(fields: [categoryWisata_id], references: [id])
+  tw_perencanaan_otomatis TempatWisataPerencanaanOtomatis[]
 
   @@map("perencanaan_otomatis")
+}
+
+model TempatWisataPerencanaanOtomatis {
+  id                     Int                 @id @default(autoincrement())
+  tanggal_perencanaan    DateTime
+  perencanaanOtomatis_id Int
+  perencanaanOtomatis    PerencanaanOtomatis @relation(fields: [perencanaanOtomatis_id], references: [id], onDelete: Cascade)
+  tempatWisata_id        Int
+  tempatWisata           TempatWisata        @relation(fields: [tempatWisata_id], references: [id])
+
+  @@map("tempatWisata_perencanaan_otomatis")
 }
 
 model Test {

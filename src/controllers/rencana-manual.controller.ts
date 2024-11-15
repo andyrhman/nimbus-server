@@ -5,7 +5,7 @@ import { formatValidationErrors } from '../utility/validation.utility';
 import { myPrisma } from '../config/db.config';
 import { asyncError } from '../middleware/global-error.middleware';
 
-export const GetRencanaUser: any = async (req: Request, res: Response) => {
+export const GetRencanaUserManual: any = async (req: Request, res: Response) => {
     const user = req["user"];
     const rencanaku = await myPrisma.perencanaanManual.findMany({
         where: { user_id: user.id },
@@ -36,7 +36,7 @@ export const CreateRencanaManual = async (req: Request, res: Response) => {
     res.send(rencana);
 };
 
-export const CreateRencanaTempatWisata = async (req: Request, res: Response) => {
+export const CreateRencanaTempatWisataManual = async (req: Request, res: Response) => {
     const body = req.body;
 
     const tempatWisata = await myPrisma.tempatWisataPerencanaanManual.create({
@@ -62,7 +62,7 @@ export const DeleteRencanaManual: any = async (req: Request, res: Response) => {
     res.status(204).send(null);
 };
 
-export const DeleteRencanaTempatWisata: any = async (req: Request, res: Response) => {
+export const DeleteRencanaTempatWisataManual: any = async (req: Request, res: Response) => {
     const user = req["user"];
 
     const perencanaanManual = await myPrisma.perencanaanManual.findFirst({ where: { id: Number(req.params.id_rencana_manual), user_id: user.id } });

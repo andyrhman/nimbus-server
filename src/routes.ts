@@ -4,7 +4,8 @@ import { AuthMiddleware } from "./middleware/auth.middleware";
 import { CreateProvinsi, DeleteProvinsi, GetProvinsi, UpdateProvinsi } from "./controllers/provinsi.controller";
 import { CreateCategoryWisata, DeleteCategoryWisata, GetCategoryWisata, UpdateCategoryWisata } from "./controllers/category-wisata.controller";
 import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetTempatWisata, UpdateTempatWisata } from "./controllers/tempat-wisata.controller";
-import { CreateRencanaManual, CreateRencanaTempatWisata, DeleteRencanaManual, DeleteRencanaTempatWisata, GetRencanaUser } from "./controllers/rencana-manual.controller";
+import { CreateRencanaManual, CreateRencanaTempatWisataManual, DeleteRencanaManual, DeleteRencanaTempatWisataManual, GetRencanaUserManual } from "./controllers/rencana-manual.controller";
+import { CreateRencanaOtomatis, GetRencanaUserOtomatis, CreateRencanaTempatWisataOtomatis, DeleteRencanaOtomatis, DeleteRencanaTempatWisataOtomatis } from "./controllers/rencana-otomatis.controller";
 
 export const routes = (router: Router) => {
     // * Health Check
@@ -50,11 +51,18 @@ export const routes = (router: Router) => {
     router.put('/api/admin/tempat-wisata/:id', AuthMiddleware, UpdateTempatWisata);
     router.delete('/api/admin/tempat-wisata/:id', AuthMiddleware, DeleteTempatWisata);
 
-    // * Perencanaan
-    router.get('/api/user/rencanaku', AuthMiddleware, GetRencanaUser);
+    // * Perencanaan Manual
+    router.get('/api/user/rencanaku-manual', AuthMiddleware, GetRencanaUserManual);
     router.post('/api/user/rencana-manual', AuthMiddleware, CreateRencanaManual);
-    router.post('/api/user/rencana-wisata-manual', AuthMiddleware, CreateRencanaTempatWisata);
+    router.post('/api/user/rencana-wisata-manual', AuthMiddleware, CreateRencanaTempatWisataManual);
     router.delete('/api/user/rencana-manual/:id', AuthMiddleware, DeleteRencanaManual);
-    router.delete('/api/user/rencana-wisata-manual/:id_rencana_manual/:id_tempat_wisata', AuthMiddleware, DeleteRencanaTempatWisata);
+    router.delete('/api/user/rencana-wisata-manual/:id_rencana_manual/:id_tempat_wisata', AuthMiddleware, DeleteRencanaTempatWisataManual);
+
+    // * Perencanaan Otomatis
+    router.get('/api/user/rencanaku-ai', AuthMiddleware, GetRencanaUserOtomatis);
+    router.post('/api/user/rencana-otomatis', AuthMiddleware, CreateRencanaOtomatis);
+    router.post('/api/user/rencana-wisata-otomatis', AuthMiddleware, CreateRencanaTempatWisataOtomatis);
+    router.delete('/api/user/rencana-otomatis/:id', AuthMiddleware, DeleteRencanaOtomatis);
+    router.delete('/api/user/rencana-wisata-otomatis/:id_rencana_otomatis/:id_tempat_wisata', AuthMiddleware, DeleteRencanaTempatWisataOtomatis);
 
 };
