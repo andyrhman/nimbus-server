@@ -4,10 +4,15 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { routes } from './routes';
 import { ValidationMiddleware } from './middleware/validation.middleware';
+import { createClient } from 'redis';
 
 dotenv.config();
 
 const app = express();
+
+export const client = createClient({
+    url: process.env.REDIS_URL
+});
 
 app.use(express.json());
 app.use(cookieParser());
@@ -18,6 +23,17 @@ app.use(cors({
 }));
 
 routes(app);
+
+client.on('error', (err) => console.error('Redis Client Error', err));
+
+(async () => {
+    try {
+        await client.connect();
+        console.log('Connected to Redis');
+    } catch (error) {
+        console.error('Failed to connect to Redis:', error);
+    }
+})();
 
 app.listen(process.env.PORT, () => {
     console.log(`Server listening on port ${process.env.PORT}`);

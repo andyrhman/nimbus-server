@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UpdateTempatWisataDTO } from '../validation/dto/update-tw.dto';
 import { validateFile } from '../middleware/validation.middleware';
 import { capitalizeFirstLetter } from '../utility/firstLetterCap.utility';
+import { client } from '..';
 
 export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
     let searchQuery = req.query.search?.toString().toLowerCase();
@@ -17,38 +18,52 @@ export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
         searchQuery = capitalizeFirstLetter(searchQuery);
     }
 
-    const tempatWisata = await myPrisma.tempatWisata.findMany({
-        where: {
-            OR: [
-                {
-                    nama: {
-                        contains: searchQuery,
-                        mode: "insensitive"
-                    }
-                },
-                {
-                    provinsi: {
-                        nama: {
-                            contains: searchQuery,
-                            mode: "insensitive"
-                        }
-                    }
-                },
-                {
-                    categoryWisata: {
-                        nama: {
-                            contains: searchQuery,
-                            mode: "insensitive"
-                        }
-                    }
+    const cacheKey = searchQuery
+        ? `tempatWisata_search_${searchQuery}`
+        : 'allTempatWisata';
+
+    let tempatWisata = JSON.parse(await client.get(cacheKey));
+
+    if (!tempatWisata) {
+        tempatWisata = await myPrisma.tempatWisata.findMany({
+            where: searchQuery
+                ? {
+                    OR: [
+                        {
+                            nama: {
+                                contains: searchQuery,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            provinsi: {
+                                nama: {
+                                    contains: searchQuery,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+                        {
+                            categoryWisata: {
+                                nama: {
+                                    contains: searchQuery,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+                    ],
                 }
-            ]
-        },
-        include: {
-            provinsi: true,
-            categoryWisata: true
-        }
-    });
+                : undefined,
+            include: {
+                provinsi: true,
+                categoryWisata: true,
+            },
+        });
+
+        await client.set(cacheKey, JSON.stringify(tempatWisata), {
+            EX: 1800, // 30 minutes
+        });
+    }
 
     if (tempatWisata.length === 0) {
         return res
@@ -60,14 +75,29 @@ export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
 };
 
 export const GetAllTempatWisataProvinsi: any = async (req: Request, res: Response) => {
-    let provinsi = await myPrisma.provinsi.findMany({
-        where: { nama: req.params.provinsi },
-        include: {
-            tempatWisata: true
-        }
-    });
-    if (req.query.search) {
-        const search = capitalizeFirstLetter(req.query.search.toString().toLowerCase());
+    const provinsiName = req.params.provinsi;
+    const searchQuery = req.query.search?.toString().toLowerCase();
+    const cacheKey = searchQuery
+        ? `tempatWisataProvinsi_search_${provinsiName}_${searchQuery}`
+        : `tempatWisataProvinsi_${provinsiName}`;
+
+    let provinsi = JSON.parse(await client.get(cacheKey));
+
+    if (!provinsi) {
+        provinsi = await myPrisma.provinsi.findMany({
+            where: { nama: provinsiName },
+            include: {
+                tempatWisata: true
+            }
+        });
+
+        await client.set(cacheKey, JSON.stringify(provinsi), {
+            EX: 1800 // 30 minutes
+        });
+    }
+
+    if (searchQuery) {
+        const search = capitalizeFirstLetter(searchQuery);
 
         provinsi = provinsi.map((p) => {
             const filteredTempatWisata = p.tempatWisata.filter((tw) =>
@@ -81,9 +111,9 @@ export const GetAllTempatWisataProvinsi: any = async (req: Request, res: Respons
         }).filter(p => p.tempatWisata.length > 0);
 
         if (provinsi.length === 0) {
-            return res
-                .status(404)
-                .json({ message: `No ${search} matching your search criteria.` });
+            return res.status(404).json({
+                message: `No places matching your search criteria for "${search}".`
+            });
         }
     }
 
@@ -91,15 +121,29 @@ export const GetAllTempatWisataProvinsi: any = async (req: Request, res: Respons
 };
 
 export const GetAllTempatWisataCategory: any = async (req: Request, res: Response) => {
-    let twCategory = await myPrisma.categoryWisata.findMany({
-        where: { nama: req.params.category_wisata },
-        include: {
-            tempatWisata: true
-        }
-    });
+    const categoryName = req.params.category_wisata;
+    const searchQuery = req.query.search?.toString().toLowerCase();
+    const cacheKey = searchQuery
+        ? `tempatWisataCategory_search_${categoryName}_${searchQuery}`
+        : `tempatWisataCategory_${categoryName}`;
 
-    if (req.query.search) {
-        const search = capitalizeFirstLetter(req.query.search.toString().toLowerCase());
+    let twCategory = JSON.parse(await client.get(cacheKey));
+
+    if (!twCategory) {
+        twCategory = await myPrisma.categoryWisata.findMany({
+            where: { nama: categoryName },
+            include: {
+                tempatWisata: true
+            }
+        });
+
+        await client.set(cacheKey, JSON.stringify(twCategory), {
+            EX: 1800 // 30 minutes
+        });
+    }
+
+    if (searchQuery) {
+        const search = capitalizeFirstLetter(searchQuery);
 
         twCategory = twCategory.map((twC) => {
             const filteredTempatWisata = twC.tempatWisata.filter((tw) =>
@@ -113,11 +157,12 @@ export const GetAllTempatWisataCategory: any = async (req: Request, res: Respons
         }).filter(twC => twC.tempatWisata.length > 0);
 
         if (twCategory.length === 0) {
-            return res
-                .status(404)
-                .json({ message: `No ${search} matching your search criteria.` });
+            return res.status(404).json({
+                message: `No places matching your search criteria for "${search}".`
+            });
         }
     }
+
     res.send(twCategory);
 };
 
