@@ -5,12 +5,19 @@ import { formatValidationErrors } from '../utility/validation.utility';
 import { myPrisma } from '../config/db.config';
 import { asyncError } from '../middleware/global-error.middleware';
 
-export const GetRencanaUser = async (req: Request, res: Response) => {
+export const GetRencanaUser: any = async (req: Request, res: Response) => {
     const user = req["user"];
     const rencanaku = await myPrisma.perencanaanManual.findMany({
-        where: { user_id: user.id }
+        where: { user_id: user.id },
+        include: {
+            tw_perencanaan_manual: {
+                include: {
+                    tempatWisata: true
+                }
+            }
+        }
     });
-
+    if (!rencanaku) return res.status(403).send({ message: "Not Allowed!" });
     res.json(rencanaku);
 };
 
@@ -41,4 +48,28 @@ export const CreateRencanaTempatWisata = async (req: Request, res: Response) => 
     });
 
     res.send(tempatWisata);
-}; 
+};
+
+export const DeleteRencanaManual: any = async (req: Request, res: Response) => {
+    const user = req["user"];
+
+    const perencanaanManual = await myPrisma.perencanaanManual.findFirst({ where: { id: Number(req.params.id), user_id: user.id } });
+
+    if (!perencanaanManual) return res.status(403).send({ message: "Not Allowed!" });
+
+    await myPrisma.perencanaanManual.delete({ where: { id: Number(req.params.id), user_id: user.id } });
+
+    res.status(204).send(null);
+};
+
+export const DeleteRencanaTempatWisata: any = async (req: Request, res: Response) => {
+    const user = req["user"];
+
+    const perencanaanManual = await myPrisma.perencanaanManual.findFirst({ where: { id: Number(req.params.id_rencana_manual), user_id: user.id } });
+
+    if (!perencanaanManual) return res.status(403).send({ message: "Not Allowed!" });
+
+    await myPrisma.tempatWisataPerencanaanManual.delete({ where: { id: Number(req.params.id_tempat_wisata) } });
+
+    res.status(204).send(null);
+};

@@ -85,12 +85,12 @@ model CategoryWisata {
 }
 
 model PerencanaanManual {
-  id                            Int                             @id @default(autoincrement())
-  nama                          String
-  budget                        String
-  user_id                       Int
-  user                          User                            @relation(fields: [user_id], references: [id])
-  TempatWisataPerencanaanManual TempatWisataPerencanaanManual[]
+  id                    Int                             @id @default(autoincrement())
+  nama                  String
+  budget                String
+  user_id               Int
+  user                  User                            @relation(fields: [user_id], references: [id])
+  tw_perencanaan_manual TempatWisataPerencanaanManual[]
 
   @@map("perencanaan_manual")
 }
@@ -99,7 +99,7 @@ model TempatWisataPerencanaanManual {
   id                   Int               @id @default(autoincrement())
   tanggal_perencanaan  DateTime
   perencanaanManual_id Int
-  perencanaanManual    PerencanaanManual @relation(fields: [perencanaanManual_id], references: [id])
+  perencanaanManual    PerencanaanManual @relation(fields: [perencanaanManual_id], references: [id], onDelete: Cascade)
   tempatWisata_id      Int
   tempatWisata         TempatWisata      @relation(fields: [tempatWisata_id], references: [id])
 
