@@ -6,6 +6,8 @@ import { CreateCategoryWisata, DeleteCategoryWisata, GetAllCategoryWisata, GetCa
 import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetTempatWisata, UpdateTempatWisata } from "./controllers/tempat-wisata.controller";
 import { CreateRencanaManual, CreateRencanaTempatWisataManual, DeleteRencanaManual, DeleteRencanaTempatWisataManual, GetRencanaUserManual } from "./controllers/rencana-manual.controller";
 import { CreateRencanaOtomatis, GetRencanaUserOtomatis, CreateRencanaTempatWisataOtomatis, DeleteRencanaOtomatis, DeleteRencanaTempatWisataOtomatis } from "./controllers/rencana-otomatis.controller";
+import { DeleteUser, Users } from "./controllers/user.controller";
+import { PerencanaanManualChart, PerencanaanOtomatisChart, Stats, UsersChart } from "./controllers/statistic.controller";
 
 export const routes = (router: Router) => {
     // * Health Check
@@ -28,12 +30,16 @@ export const routes = (router: Router) => {
     router.post('/api/admin/send-password-token', AuthMiddleware, SendPasswordToken);
     router.put('/api/admin/password', AuthMiddleware, UpdatePassword);
 
+    // * User
+    router.get("/api/admin/users", AuthMiddleware, Users);
+    router.delete("/api/admin/users/:id", AuthMiddleware, DeleteUser);
+
     // * Provinsi
     router.get('/api/user/provinsi', GetAllProvinsi);
     router.post('/api/admin/provinsi', AuthMiddleware, CreateProvinsi);
-    router.get('/api/provinsi/:id', AuthMiddleware, GetProvinsi);
-    router.put('/api/provinsi/:id', AuthMiddleware, UpdateProvinsi);
-    router.delete('/api/provinsi/:id', AuthMiddleware, DeleteProvinsi);
+    router.get('/api/admin/provinsi/:id', AuthMiddleware, GetProvinsi);
+    router.put('/api/admin/provinsi/:id', AuthMiddleware, UpdateProvinsi);
+    router.delete('/api/admin/provinsi/:id', AuthMiddleware, DeleteProvinsi);
 
     // * Category Wisata
     router.get('/api/user/category-wisata', GetAllCategoryWisata);
@@ -65,5 +71,11 @@ export const routes = (router: Router) => {
     router.post('/api/user/rencana-wisata-otomatis', AuthMiddleware, CreateRencanaTempatWisataOtomatis);
     router.delete('/api/user/rencana-otomatis/:id', AuthMiddleware, DeleteRencanaOtomatis);
     router.delete('/api/user/rencana-wisata-otomatis/:id_rencana_otomatis/:id_tempat_wisata', AuthMiddleware, DeleteRencanaTempatWisataOtomatis);
+
+    // * Statistic
+    router.get("/api/admin/stats", AuthMiddleware, Stats);
+    router.get('/api/admin/user-chart', AuthMiddleware, UsersChart);
+    router.get('/api/admin/pm-chart', AuthMiddleware, PerencanaanManualChart);
+    router.get('/api/admin/po-chart', AuthMiddleware, PerencanaanOtomatisChart);
 
 };

@@ -94,6 +94,7 @@ model PerencanaanManual {
   user                  User                            @relation(fields: [user_id], references: [id])
   provinsi_id           Int
   provinsi              Provinsi                        @relation(fields: [provinsi_id], references: [id])
+  created_at            DateTime                        @default(now())
   categoryWisata_id     Int
   categoryWisata        CategoryWisata                  @relation(fields: [categoryWisata_id], references: [id])
   tw_perencanaan_manual TempatWisataPerencanaanManual[]
@@ -120,6 +121,7 @@ model PerencanaanOtomatis {
   User                    User                              @relation(fields: [user_id], references: [id])
   provinsi_id             Int
   provinsi                Provinsi                          @relation(fields: [provinsi_id], references: [id])
+  created_at              DateTime                          @default(now())
   categoryWisata_id       Int
   categoryWisata          CategoryWisata                    @relation(fields: [categoryWisata_id], references: [id])
   tw_perencanaan_otomatis TempatWisataPerencanaanOtomatis[]

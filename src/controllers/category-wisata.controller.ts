@@ -20,13 +20,33 @@ export const CreateCategoryWisata: any = async (req: Request, res: Response) => 
 };
 
 export const GetCategoryWisata: any = async (req: Request, res: Response) => {
-
+    const category = await myPrisma.categoryWisata.findUnique({
+        where: { id: Number(req.params.id) }
+    });
+    res.status(200).send(category);
 };
 
 export const UpdateCategoryWisata: any = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { nama, thumbnail } = req.body;
 
+    const updatedCategory = await myPrisma.categoryWisata.update({
+        where: { id: Number(id) },
+        data: {
+            nama,
+            thumbnail
+        }
+    });
+
+    res.send(updatedCategory);
 };
 
 export const DeleteCategoryWisata: any = async (req: Request, res: Response) => {
+    const { id } = req.params;
 
+    await myPrisma.categoryWisata.delete({
+        where: { id: Number(id) }
+    });
+
+    res.status(204).send(null);
 };
