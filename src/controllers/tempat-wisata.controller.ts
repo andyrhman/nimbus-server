@@ -3,7 +3,6 @@ import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { formatValidationErrors } from '../utility/validation.utility';
 import { myPrisma } from '../config/db.config';
-import { asyncError } from '../middleware/global-error.middleware';
 import { CreateTempatWisataDTO } from '../validation/dto/create-tw.dto';
 import { bucket, upload } from '../config/storage.config';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +10,7 @@ import { UpdateTempatWisataDTO } from '../validation/dto/update-tw.dto';
 import { validateFile } from '../middleware/validation.middleware';
 import { capitalizeFirstLetter } from '../utility/firstLetterCap.utility';
 import { client } from '..';
+import pako from 'pako';
 
 export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
     let searchQuery = req.query.search?.toString().toLowerCase();
@@ -18,14 +18,21 @@ export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
         searchQuery = capitalizeFirstLetter(searchQuery);
     }
 
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 50;
     const cacheKey = searchQuery
-        ? `tempatWisata_search_${searchQuery}`
-        : 'allTempatWisata';
+        ? `tempatWisata_search_${searchQuery}_page_${page}_size_${pageSize}`
+        : `allTempatWisata_page_${page}_size_${pageSize}`;
 
-    let tempatWisata = JSON.parse(await client.get(cacheKey));
+    let tempatWisata;
 
-    if (!tempatWisata) {
+    const cachedData: any = await client.get(cacheKey);
+    if (cachedData) {
+        tempatWisata = JSON.parse(pako.inflate(Buffer.from(cachedData, 'base64'), { to: 'string' }));
+    } else {
         tempatWisata = await myPrisma.tempatWisata.findMany({
+            take: pageSize,
+            skip: (page - 1) * pageSize,
             where: searchQuery
                 ? {
                     OR: [
@@ -60,7 +67,8 @@ export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
             },
         });
 
-        await client.set(cacheKey, JSON.stringify(tempatWisata), {
+        const compressedData = Buffer.from(pako.deflate(JSON.stringify(tempatWisata))).toString('base64');
+        await client.set(cacheKey, compressedData, {
             EX: 1800, // 30 minutes
         });
     }
@@ -77,93 +85,151 @@ export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
 export const GetAllTempatWisataProvinsi: any = async (req: Request, res: Response) => {
     const provinsiName = req.params.provinsi;
     const searchQuery = req.query.search?.toString().toLowerCase();
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const take = parseInt(req.query.take as string, 10) || 10; // Items per page
+    const skip = (page - 1) * take;
+
     const cacheKey = searchQuery
-        ? `tempatWisataProvinsi_search_${provinsiName}_${searchQuery}`
-        : `tempatWisataProvinsi_${provinsiName}`;
+        ? `tempatWisataProvinsi_search_${provinsiName}_${searchQuery}_page_${page}_take_${take}`
+        : `tempatWisataProvinsi_${provinsiName}_page_${page}_take_${take}`;
 
-    let provinsi = JSON.parse(await client.get(cacheKey));
+    let provinsi: any;
 
-    if (!provinsi) {
+    // Check Redis Cache
+    const cachedData = await client.get(cacheKey);
+    if (cachedData) {
+        provinsi = JSON.parse(
+            pako.inflate(Buffer.from(cachedData, 'base64'), { to: 'string' })
+        );
+    } else {
+        // Fetch from database
         provinsi = await myPrisma.provinsi.findMany({
             where: { nama: provinsiName },
             include: {
-                tempatWisata: true
-            }
+                tempatWisata: {
+                    skip,
+                    take,
+                },
+            },
         });
 
-        await client.set(cacheKey, JSON.stringify(provinsi), {
-            EX: 1800 // 30 minutes
-        });
+        // Compress and store in Redis
+        const compressedData = Buffer.from(pako.deflate(JSON.stringify(provinsi))).toString('base64');
+        await client.set(cacheKey, compressedData, { EX: 1800 }); // Cache for 30 minutes
     }
 
     if (searchQuery) {
-        const search = capitalizeFirstLetter(searchQuery);
+        const search = searchQuery;
 
-        provinsi = provinsi.map((p) => {
-            const filteredTempatWisata = p.tempatWisata.filter((tw) =>
-                tw.nama.toLowerCase().includes(search)
-            );
+        provinsi = provinsi
+            .map((p) => {
+                const filteredTempatWisata = p.tempatWisata.filter((tw) =>
+                    tw.nama.toLowerCase().includes(search)
+                );
 
-            return {
-                ...p,
-                tempatWisata: filteredTempatWisata
-            };
-        }).filter(p => p.tempatWisata.length > 0);
+                return {
+                    ...p,
+                    tempatWisata: filteredTempatWisata,
+                };
+            })
+            .filter((p) => p.tempatWisata.length > 0);
 
         if (provinsi.length === 0) {
             return res.status(404).json({
-                message: `No places matching your search criteria for "${search}".`
+                message: `No places matching your search criteria for "${search}".`,
             });
         }
     }
 
-    res.send(provinsi);
+    // Pagination meta
+    const total = await myPrisma.tempatWisata.count({
+        where: { provinsi: { nama: provinsiName } },
+    });
+    const lastPage = Math.ceil(total / take);
+
+    res.send({
+        data: provinsi,
+        meta: {
+            total,
+            page,
+            last_page: lastPage,
+        },
+    });
 };
 
 export const GetAllTempatWisataCategory: any = async (req: Request, res: Response) => {
     const categoryName = req.params.category_wisata;
     const searchQuery = req.query.search?.toString().toLowerCase();
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const take = parseInt(req.query.take as string, 10) || 10; // Items per page
+    const skip = (page - 1) * take;
+
     const cacheKey = searchQuery
-        ? `tempatWisataCategory_search_${categoryName}_${searchQuery}`
-        : `tempatWisataCategory_${categoryName}`;
+        ? `tempatWisataCategory_search_${categoryName}_${searchQuery}_page_${page}_take_${take}`
+        : `tempatWisataCategory_${categoryName}_page_${page}_take_${take}`;
 
-    let twCategory = JSON.parse(await client.get(cacheKey));
+    let twCategory: any;
 
-    if (!twCategory) {
+    // Check Redis Cache
+    const cachedData = await client.get(cacheKey);
+    if (cachedData) {
+        twCategory = JSON.parse(
+            pako.inflate(Buffer.from(cachedData, 'base64'), { to: 'string' })
+        );
+    } else {
+        // Fetch from database
         twCategory = await myPrisma.categoryWisata.findMany({
             where: { nama: categoryName },
             include: {
-                tempatWisata: true
-            }
+                tempatWisata: {
+                    skip,
+                    take,
+                },
+            },
         });
 
-        await client.set(cacheKey, JSON.stringify(twCategory), {
-            EX: 1800 // 30 minutes
-        });
+        // Compress and store in Redis
+        const compressedData = Buffer.from(pako.deflate(JSON.stringify(twCategory))).toString('base64');
+        await client.set(cacheKey, compressedData, { EX: 1800 }); // Cache for 30 minutes
     }
 
     if (searchQuery) {
-        const search = capitalizeFirstLetter(searchQuery);
+        const search = searchQuery;
 
-        twCategory = twCategory.map((twC) => {
-            const filteredTempatWisata = twC.tempatWisata.filter((tw) =>
-                tw.nama.toLowerCase().includes(search)
-            );
+        twCategory = twCategory
+            .map((twC) => {
+                const filteredTempatWisata = twC.tempatWisata.filter((tw) =>
+                    tw.nama.toLowerCase().includes(search)
+                );
 
-            return {
-                ...twC,
-                tempatWisata: filteredTempatWisata
-            };
-        }).filter(twC => twC.tempatWisata.length > 0);
+                return {
+                    ...twC,
+                    tempatWisata: filteredTempatWisata,
+                };
+            })
+            .filter((twC) => twC.tempatWisata.length > 0);
 
         if (twCategory.length === 0) {
             return res.status(404).json({
-                message: `No places matching your search criteria for "${search}".`
+                message: `No places matching your search criteria for "${search}".`,
             });
         }
     }
 
-    res.send(twCategory);
+    // Pagination meta
+    const total = await myPrisma.tempatWisata.count({
+        where: { categoryWisata: { nama: categoryName } },
+    });
+    const lastPage = Math.ceil(total / take);
+
+    res.send({
+        data: twCategory,
+        meta: {
+            total,
+            page,
+            last_page: lastPage,
+        },
+    });
 };
 
 export const CreateTempatWisata: any = [

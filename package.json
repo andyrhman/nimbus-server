@@ -8,7 +8,10 @@
     "postbuild": "node build.mjs",
     "dev": "set NODE_ENV=development && nodemon --exec npx tsx src/index.ts",
     "start": "set NODE_ENV=production && node dist/index.js",
-    "seed:ambassadors": "ts-node src/seeder/ambassador.seeder.ts"
+    "seed:users": "npx tsx src/seed/user.seeder.ts",
+    "seed:provinsi": "npx tsx src/seed/provinsi-wisata.seeder.ts",
+    "seed:cw": "npx tsx src/seed/category-wisata.seeder.ts",
+    "seed:tw": "npx tsx src/seed/tempat-wisata.seeder.ts"
   },
   "repository": {
     "type": "git",
@@ -32,6 +35,7 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.9.0",
     "@types/nodemailer": "^6.4.16",
+    "@types/pako": "^2.0.3",
     "@types/sanitize-html": "^2.13.0",
     "nodemon": "^3.1.7",
     "prisma": "^5.22.0",
@@ -55,6 +59,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
+    "pako": "^2.1.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
     "sanitize-html": "^2.13.1",
