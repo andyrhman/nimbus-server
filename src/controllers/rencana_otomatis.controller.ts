@@ -3,7 +3,6 @@ import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { formatValidationErrors } from '../utility/validation.utility';
 import { myPrisma } from '../config/db.config';
-import { asyncError } from '../middleware/global-error.middleware';
 
 export const GetRencanaUserOtomatis: any = async (req: Request, res: Response) => {
     const user = req["user"];
@@ -23,7 +22,7 @@ export const GetRencanaUserOtomatis: any = async (req: Request, res: Response) =
     res.json(rencanaku);
 };
 
-export const CreateRencanaOtomatis = async (req: Request, res: Response) => {
+export const CreateRencanaOtomatis: any = async (req: Request, res: Response) => {
     const user = req["user"];
     const body = req.body;
 
@@ -53,11 +52,21 @@ export const CreateRencanaOtomatis = async (req: Request, res: Response) => {
 };
 
 // TODO This controller is still questionable wether we delete or not...
-export const CreateRencanaTempatWisataOtomatis = async (req: Request, res: Response) => {
+export const CreateRencanaTempatWisataOtomatis: any = async (req: Request, res: Response) => {
+    const user = req["user"];
     const body = req.body;
 
     // ! Kode ML
     // ? const fetchRencanaOtomatis = await myPrisma.perencaan
+
+    const checkRencanaOtomatisUser = await myPrisma.perencanaanOtomatis.findFirst({
+        where: {
+            id: body.perencanaanOtomatis_id,
+            user_id: user.id
+        }
+    });
+
+    if (!checkRencanaOtomatisUser) return res.status(403).send({ message: "Not Allowed!" });
 
     const tempatWisata = await myPrisma.tempatWisataPerencanaanOtomatis.create({
         data: {

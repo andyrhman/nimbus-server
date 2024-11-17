@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
-import { verify } from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 import { myPrisma } from "../config/db.config";
 
 export const AuthMiddleware: any = async (req: Request, res: Response, next: Function) => {
     try {
-        const jwt = req.cookies["user_session"];
+        const mySession = req.cookies["user_session"];
 
         if (!jwt) {
             return res.status(401).send({ message: "Unauthenticated" });
         }
-
-        const payload: any = verify(jwt, process.env.JWT_SECRET_ACCESS);
+        const { verify } = jwt;
+        const payload: any = verify(mySession, process.env.JWT_SECRET_ACCESS);
 
         if (!payload) {
             return res.status(401).send({ message: "Unauthenticated" });

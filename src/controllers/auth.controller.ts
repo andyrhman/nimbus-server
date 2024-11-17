@@ -6,14 +6,13 @@ import { formatValidationErrors } from '../utility/validation.utility';
 import { UpdateInfoDTO } from '../validation/dto/update-info.dto';
 import { myPrisma } from '../config/db.config';
 import { UpdatePasswordDTO } from '../validation/dto/update-password.dto';
-import { asyncError } from '../middleware/global-error.middleware';
 import { bucket, upload } from '../config/storage.config';
 import { generateRandom6DigitNumber } from '../utility/sixdigitnumber.utility';
 import { TokenService } from '../service/token.service';
 import jwt from 'jsonwebtoken';
 import transporter from '../config/transporter.config';
+import Handlebars from "handlebars";
 import * as fs from "fs";
-import * as handlebars from "handlebars";
 import * as argon2 from 'argon2';
 
 export const Register: any = async (req: Request, res: Response) => {
@@ -242,7 +241,7 @@ export const SendPasswordToken: any = async (req: Request, res: Response) => {
         .readFileSync("src/templates/password-reset.hbs", "utf-8")
         .toString();
 
-    const template = handlebars.compile(source);
+    const template = Handlebars.compile(source);
 
     const replacements = {
         token,
@@ -251,10 +250,11 @@ export const SendPasswordToken: any = async (req: Request, res: Response) => {
     const htmlToSend = template(replacements);
 
     const options = {
-        from: "from@mail.com",
+        from: process.env.GMAIL_EMAIL,
         to: user.email,
-        subject: "Verify your email",
+        subject: "Reset Your Password",
         html: htmlToSend,
+        sandbox: true
     };
 
     await transporter.sendMail(options);

@@ -10,6 +10,6 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
-  "include": ["src/**/*"]
-  // "exclude": ["src/seeder/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/seed/**/*"]
 }

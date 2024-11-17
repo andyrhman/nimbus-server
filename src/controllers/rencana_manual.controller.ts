@@ -3,7 +3,6 @@ import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { formatValidationErrors } from '../utility/validation.utility';
 import { myPrisma } from '../config/db.config';
-import { asyncError } from '../middleware/global-error.middleware';
 
 export const GetRencanaUserManual: any = async (req: Request, res: Response) => {
     const user = req["user"];
@@ -23,7 +22,7 @@ export const GetRencanaUserManual: any = async (req: Request, res: Response) => 
     res.json(rencanaku);
 };
 
-export const CreateRencanaManual = async (req: Request, res: Response) => {
+export const CreateRencanaManual: any = async (req: Request, res: Response) => {
     const user = req["user"];
     const body = req.body;
 
@@ -40,8 +39,18 @@ export const CreateRencanaManual = async (req: Request, res: Response) => {
     res.send(rencana);
 };
 
-export const CreateRencanaTempatWisataManual = async (req: Request, res: Response) => {
+export const CreateRencanaTempatWisataManual: any = async (req: Request, res: Response) => {
+    const user = req["user"];
     const body = req.body;
+
+    const checkRencanaManualUser = await myPrisma.perencanaanManual.findFirst({
+        where: {
+            id: body.perencanaanManual_id,
+            user_id: user.id
+        }
+    });
+
+    if (!checkRencanaManualUser) return res.status(403).send({ message: "Not Allowed!" });
 
     const tempatWisata = await myPrisma.tempatWisataPerencanaanManual.create({
         data: {

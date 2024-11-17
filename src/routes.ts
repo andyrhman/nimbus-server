@@ -2,10 +2,10 @@ import { Router, Request, Response } from "express";
 import { AuthenticatedUser, Login, Logout, Register, SendPasswordToken, UpdateInfo, UpdatePassword } from "./controllers/auth.controller";
 import { AuthMiddleware } from "./middleware/auth.middleware";
 import { CreateProvinsi, DeleteProvinsi, GetAllProvinsi, GetProvinsi, UpdateProvinsi } from "./controllers/provinsi.controller";
-import { CreateCategoryWisata, DeleteCategoryWisata, GetAllCategoryWisata, GetCategoryWisata, UpdateCategoryWisata } from "./controllers/category-wisata.controller";
-import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetTempatWisata, UpdateTempatWisata } from "./controllers/tempat-wisata.controller";
-import { CreateRencanaManual, CreateRencanaTempatWisataManual, DeleteRencanaManual, DeleteRencanaTempatWisataManual, GetRencanaUserManual } from "./controllers/rencana-manual.controller";
-import { CreateRencanaOtomatis, GetRencanaUserOtomatis, CreateRencanaTempatWisataOtomatis, DeleteRencanaOtomatis, DeleteRencanaTempatWisataOtomatis } from "./controllers/rencana-otomatis.controller";
+import { CreateCategoryWisata, DeleteCategoryWisata, GetAllCategoryWisata, GetCategoryWisata, UpdateCategoryWisata } from "./controllers/category_wisata.controller";
+import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetTempatWisata, UpdateTempatWisata } from "./controllers/tempat_wisata.controller";
+import { CreateRencanaManual, CreateRencanaTempatWisataManual, DeleteRencanaManual, DeleteRencanaTempatWisataManual, GetRencanaUserManual } from "./controllers/rencana_manual.controller";
+import { CreateRencanaOtomatis, GetRencanaUserOtomatis, CreateRencanaTempatWisataOtomatis, DeleteRencanaOtomatis, DeleteRencanaTempatWisataOtomatis } from "./controllers/rencana_otomatis.controller";
 import { DeleteUser, Users } from "./controllers/user.controller";
 import { PerencanaanManualChart, PerencanaanOtomatisChart, Stats, UsersChart } from "./controllers/statistic.controller";
 
