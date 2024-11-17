@@ -19,7 +19,9 @@ app.use(cookieParser());
 app.use(ValidationMiddleware);
 app.use(cors({
     credentials: true,
-    origin: ['*']
+    origin: (origin, callback) => {
+        callback(null, true);
+    }
 }));
 
 routes(app);
