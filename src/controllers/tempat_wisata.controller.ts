@@ -72,9 +72,7 @@ export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
         });
 
         const compressedData = Buffer.from(pako.deflate(JSON.stringify(tempatWisata))).toString('base64');
-        await client.set(cacheKey, compressedData, {
-            EX: 1800, // 30 minutes
-        });
+        await client.set(cacheKey, compressedData);
     }
 
     if (tempatWisata.length === 0) {
@@ -140,7 +138,7 @@ export const GetAllTempatWisataProvinsi: any = async (req: Request, res: Respons
         const compressedData = Buffer.from(
             pako.deflate(JSON.stringify(tempatWisata))
         ).toString('base64');
-        await client.set(cacheKey, compressedData, { EX: 1800 });
+        await client.set(cacheKey, compressedData);
     }
 
     if (tempatWisata.length === 0) {
@@ -234,7 +232,7 @@ export const GetAllTempatWisataCategory: any = async (req: Request, res: Respons
         const compressedData = Buffer.from(
             pako.deflate(JSON.stringify(tempatWisata))
         ).toString('base64');
-        await client.set(cacheKey, compressedData, { EX: 1800 });
+        await client.set(cacheKey, compressedData);
     }
 
     if (tempatWisata.length === 0) {

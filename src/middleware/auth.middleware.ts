@@ -31,7 +31,6 @@ export const AuthMiddleware: any = async (req: Request, res: Response, next: Fun
             return res.status(403).send({ message: "Forbidden" });
         }
     } catch (error) {
-        console.error(error);
         return res.status(401).send({ message: "Unauthorized" });
     }
 };
