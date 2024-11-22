@@ -7,13 +7,13 @@ export const AuthMiddleware: any = async (req: Request, res: Response, next: Fun
         const mySession = req.cookies["user_session"];
 
         if (!jwt) {
-            return res.status(401).send({ message: "Unauthenticated" });
+            return res.status(401).send({ message: "Unauthorized" });
         }
         const { verify } = jwt;
         const payload: any = verify(mySession, process.env.JWT_SECRET_ACCESS);
 
         if (!payload) {
-            return res.status(401).send({ message: "Unauthenticated" });
+            return res.status(401).send({ message: "Unauthorized" });
         }
 
         const is_user = req.path.indexOf('api/user') >= 0;
@@ -32,6 +32,6 @@ export const AuthMiddleware: any = async (req: Request, res: Response, next: Fun
         }
     } catch (error) {
         console.error(error);
-        return res.status(400).send({ message: "Invalid Request" });
+        return res.status(401).send({ message: "Unauthorized" });
     }
 };

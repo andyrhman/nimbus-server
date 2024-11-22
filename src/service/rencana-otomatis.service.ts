@@ -11,15 +11,33 @@ export class PerencanaanOtomatisService extends AbstractService<
     constructor(prisma: PrismaClient) {
         super(prisma, prisma.perencanaanOtomatis);
     }
-    async chart(): Promise<any[]> {
-        const result: any = await this.prisma.$queryRaw`
+    async chart(time: string): Promise<any[]> {
+        let groupByClause: string;
+
+        switch (time) {
+            case 'day':
+                groupByClause = "TO_CHAR(po.created_at, 'YYYY-MM-DD')";
+                break;
+            case 'week':
+                groupByClause = "TO_CHAR(po.created_at, 'IYYY-IW')";
+                break;
+            case 'month':
+                groupByClause = "TO_CHAR(po.created_at, 'YYYY-MM')";
+                break;
+            default:
+                groupByClause = "TO_CHAR(po.created_at, 'YYYY-MM-DD')";
+                break;
+        }
+
+        const query = `
             SELECT
-            TO_CHAR(po.created_at, 'YYYY-MM-DD') as date,
+            ${groupByClause} as date,
             COUNT(po.id) as count
             FROM perencanaan_otomatis po
-            GROUP BY TO_CHAR(po.created_at, 'YYYY-MM-DD')
-            ORDER BY TO_CHAR(po.created_at, 'YYYY-MM-DD') ASC;
+            GROUP BY ${groupByClause}
+            ORDER BY ${groupByClause} ASC;
         `;
+        const result: any = await this.prisma.$queryRawUnsafe(query);
         return result;
     }
 }

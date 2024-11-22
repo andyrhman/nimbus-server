@@ -16,13 +16,13 @@ export const client = createClient({
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(ValidationMiddleware);
 app.use(cors({
     credentials: true,
     origin: (origin, callback) => {
         callback(null, true);
     }
 }));
+app.use(ValidationMiddleware);
 
 routes(app);
 

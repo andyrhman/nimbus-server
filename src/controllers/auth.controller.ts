@@ -98,7 +98,11 @@ export const Login: any = async (req: Request, res: Response) => {
     res.cookie('user_session', token, {
         httpOnly: true,
         maxAge: maxAge,
-    });
+        secure: true, // Ensures the cookie is sent over HTTPS
+        sameSite: 'none', // Required for cross-origin cookies
+        // secure: process.env.NODE_ENV === 'production', // Only secure in production
+        // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });    
 
     return res.send({
         message: "Successfully Logged In!"
@@ -107,7 +111,7 @@ export const Login: any = async (req: Request, res: Response) => {
 
 export const AuthenticatedUser: any = async (req: Request, res: Response) => {
     if (!req["user"]) {
-        return res.status(401).send({ message: "Unauthenticated" });
+        return res.status(401).send({ message: "Unauthorized" });
     }
     const { password, ...user } = req["user"];
 

@@ -22,15 +22,18 @@ export const Stats = async (req: Request, res: Response) => {
 
 export const UsersChart = async (req: Request, res: Response) => {
     const userService: any = new UserService(myPrisma);
-    res.send(json(await userService.chart()));
+    const time = req.query.time as string || 'day';
+    res.send(json(await userService.chart(time)));
 };
 
 export const PerencanaanManualChart = async (req: Request, res: Response) => {
     const perencanaanManualService: any = new PerencanaanManualService(myPrisma);
-    res.send(json(await perencanaanManualService.chart()));
+    const time = req.query.time as string || 'day';
+    res.send(json(await perencanaanManualService.chart(time)));
 };
 
 export const PerencanaanOtomatisChart = async (req: Request, res: Response) => {
     const perencanaanOtomatisService: any = new PerencanaanOtomatisService(myPrisma);
-    res.send(json(await perencanaanOtomatisService.chart()));
+    const time = req.query.time as string || 'day';
+    res.send(json(await perencanaanOtomatisService.chart(time)));
 };
