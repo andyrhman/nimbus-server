@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,12 +14,12 @@ model User {
   email               String                @unique
   profile_pic         String                @default("https://storage.googleapis.com/nimbus-storage/profile_pics/user.png")
   password            String
-  is_user             Boolean               @default(true)
   created_at          DateTime              @default(now())
   updated_at          DateTime              @updatedAt
-  token               Token[]
+  is_user             Boolean               @default(true)
   perencanaanManual   PerencanaanManual[]
   perencanaanOtomatis PerencanaanOtomatis[]
+  token               Token[]
 
   @@map("users")
 }
@@ -41,26 +35,26 @@ model Token {
 
   @@map("user_token")
 }
-// TODO Add updated_at on production
+
 model TempatWisata {
   id                              Int                               @id @default(autoincrement())
   nama                            String
-  alamat                          String
-  website                         String
-  google_link                     String
-  longitude                       String
-  latitude                        String
-  deskripsi                       String                            @db.Text
-  thumbnail                       String
-  review_total                    String
-  average_rating                  String
-  created_at                      DateTime                          @default(now()) 
+  deskripsi                       String
   provinsi_id                     Int
-  provinsi                        Provinsi                          @relation(fields: [provinsi_id], references: [id], onDelete: Cascade)
   categoryWisata_id               Int
-  categoryWisata                  CategoryWisata                    @relation(fields: [categoryWisata_id], references: [id], onDelete: Cascade)
+  thumbnail                       String
+  alamat                          String
+  average_rating                  String
+  google_link                     String
+  latitude                        String
+  longitude                       String
+  review_total                    String
+  website                         String
+  created_at                      DateTime                          @default(now())
   TempatWisataPerencanaanManual   TempatWisataPerencanaanManual[]
   TempatWisataPerencanaanOtomatis TempatWisataPerencanaanOtomatis[]
+  categoryWisata                  CategoryWisata                    @relation(fields: [categoryWisata_id], references: [id], onDelete: Cascade)
+  provinsi                        Provinsi                          @relation(fields: [provinsi_id], references: [id], onDelete: Cascade)
 
   @@map("tempat_wisata")
 }
@@ -69,9 +63,9 @@ model Provinsi {
   id                Int                   @id @default(autoincrement())
   nama              String
   thumbnail         String
-  tempatWisata      TempatWisata[]
   perencanaanManual PerencanaanManual[]
   perencanaan       PerencanaanOtomatis[]
+  tempatWisata      TempatWisata[]
 
   @@map("provinsi")
 }
@@ -80,9 +74,9 @@ model CategoryWisata {
   id                  Int                   @id @default(autoincrement())
   nama                String
   thumbnail           String
-  tempatWisata        TempatWisata[]
   perencanaanManual   PerencanaanManual[]
   PerencanaanOtomatis PerencanaanOtomatis[]
+  tempatWisata        TempatWisata[]
 
   @@map("category_wisata")
 }
@@ -92,12 +86,12 @@ model PerencanaanManual {
   nama                  String
   budget                String
   user_id               Int
-  user                  User                            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provinsi_id           Int
-  provinsi              Provinsi                        @relation(fields: [provinsi_id], references: [id], onDelete: Cascade)
-  created_at            DateTime                        @default(now())
   categoryWisata_id     Int
+  provinsi_id           Int
+  created_at            DateTime                        @default(now())
   categoryWisata        CategoryWisata                  @relation(fields: [categoryWisata_id], references: [id], onDelete: Cascade)
+  provinsi              Provinsi                        @relation(fields: [provinsi_id], references: [id], onDelete: Cascade)
+  user                  User                            @relation(fields: [user_id], references: [id], onDelete: Cascade)
   tw_perencanaan_manual TempatWisataPerencanaanManual[]
 
   @@map("perencanaan_manual")
@@ -106,9 +100,9 @@ model PerencanaanManual {
 model TempatWisataPerencanaanManual {
   id                   Int               @id @default(autoincrement())
   tanggal_perencanaan  DateTime
+  tempatWisata_id      Int
   perencanaanManual_id Int
   perencanaanManual    PerencanaanManual @relation(fields: [perencanaanManual_id], references: [id], onDelete: Cascade)
-  tempatWisata_id      Int
   tempatWisata         TempatWisata      @relation(fields: [tempatWisata_id], references: [id], onDelete: Cascade)
 
   @@map("tempatWisata_perencanaan_manual")
@@ -119,12 +113,12 @@ model PerencanaanOtomatis {
   nama                    String
   budget                  String
   user_id                 Int
-  User                    User                              @relation(fields: [user_id], references: [id], onDelete: Cascade)
   provinsi_id             Int
-  provinsi                Provinsi                          @relation(fields: [provinsi_id], references: [id], onDelete: Cascade)
-  created_at              DateTime                          @default(now())
   categoryWisata_id       Int
+  created_at              DateTime                          @default(now())
   categoryWisata          CategoryWisata                    @relation(fields: [categoryWisata_id], references: [id], onDelete: Cascade)
+  provinsi                Provinsi                          @relation(fields: [provinsi_id], references: [id], onDelete: Cascade)
+  User                    User                              @relation(fields: [user_id], references: [id], onDelete: Cascade)
   tw_perencanaan_otomatis TempatWisataPerencanaanOtomatis[]
 
   @@map("perencanaan_otomatis")
@@ -134,8 +128,8 @@ model TempatWisataPerencanaanOtomatis {
   id                     Int                 @id @default(autoincrement())
   tanggal_perencanaan    DateTime
   perencanaanOtomatis_id Int
-  perencanaanOtomatis    PerencanaanOtomatis @relation(fields: [perencanaanOtomatis_id], references: [id], onDelete: Cascade)
   tempatWisata_id        Int
+  perencanaanOtomatis    PerencanaanOtomatis @relation(fields: [perencanaanOtomatis_id], references: [id], onDelete: Cascade)
   tempatWisata           TempatWisata        @relation(fields: [tempatWisata_id], references: [id], onDelete: Cascade)
 
   @@map("tempatWisata_perencanaan_otomatis")
