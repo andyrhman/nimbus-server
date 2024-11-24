@@ -38,10 +38,7 @@ jobs:
           registry: ${{ secrets.REGION }}-docker.pkg.dev
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+          
       - name: 'Create env file'
         run: |
           echo PORT=${{ secrets.PORT }} >> .env
