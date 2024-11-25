@@ -33,14 +33,14 @@ jobs:
 
       - name: 'Build and Push Container'
         run: |-
-          DOCKER_TAG="${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:${{ github.sha }}"
+          DOCKER_TAG="${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:latest"
           docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ secrets.SERVICE }} \
-            --image ${DOCKER_TAG} \
+            --image ${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:latest \
             --platform managed \
             --region asia-southeast2 \
             --allow-unauthenticated
