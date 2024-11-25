@@ -13,7 +13,7 @@ export const routes = (router: Router) => {
     // * Health Check
     router.get('/', (req: Request, res: Response) => {
         res.status(200).send({
-            status: "Status Server Ok 👍 (v2)",
+            status: "Status Server Ok 👍(v2)",
             provinsi: "https://nimbus-dev-374190138836.asia-southeast2.run.app/api/user/provinsi",
             categoryWisata: "https://nimbus-dev-374190138836.asia-southeast2.run.app/api/user/category-wisata",
             tempatWisata: "https://nimbus-dev-374190138836.asia-southeast2.run.app/api/user/tempat-wisata",
