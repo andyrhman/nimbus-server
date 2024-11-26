@@ -15,7 +15,11 @@ jobs:
 
       - name: Create service account file
         run: |
-          echo "${{ secrets.GCP_NIMBUS_KEY }}" > ./src/config/serviceAccount.json
+          printf '%s' "${{ secrets.GCP_SA_KEY }}" > ./src/config/serviceAccount.json
+
+      - name: Validate JSON
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" | jq . > ./src/config/serviceAccount.json
 
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
