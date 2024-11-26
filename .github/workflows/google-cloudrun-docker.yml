@@ -17,10 +17,6 @@ jobs:
         run: |
           printf '%s' "${{ secrets.GCP_SA_KEY }}" > ./src/config/serviceAccount.json
 
-      - name: Validate JSON
-        run: |
-          echo "${{ secrets.GCP_SA_KEY }}" | jq . > ./src/config/serviceAccount.json
-
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
         with:
@@ -48,7 +44,15 @@ jobs:
           DOCKER_TAG="${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:latest"
           docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
-      
+
+      # - name: Deploy to Cloud Run
+      #   run: |
+      #     gcloud run deploy ${{ secrets.SERVICE }} \
+      #       --image ${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:latest \
+      #       --platform managed \
+      #       --region asia-southeast2 \
+      #       --allow-unauthenticated
+            
       - name: 'Show output'
         run: |2-
           echo ${{ steps.deploy.outputs.url }}
