@@ -13,6 +13,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Create service account file
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" > ./src/config/serviceAccount.json
+
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
         with:
@@ -21,6 +25,10 @@ jobs:
 
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker ${{ secrets.REGION }}-docker.pkg.dev
 
       - name: 'Create env file'
         run: |
