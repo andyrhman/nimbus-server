@@ -169,8 +169,8 @@ export const UpdateInfo: any = [
             // Delete existing profile picture if it's not the default image
             if (existingUser.profile_pic && !existingUser.profile_pic.includes("user.png")) {
                 const oldFile = bucket.file(existingUser.profile_pic.split(`https://storage.googleapis.com/${bucket.name}/`)[1]);
-                await oldFile.delete().catch(() => {
-                    console.log("Old profile picture deletion failed, but continuing with the upload.");
+                await oldFile.delete().catch((err) => {
+                    console.log("Old profile picture deletion failed, but continuing with the upload.", err);
                 });
             }
 
