@@ -6,7 +6,7 @@ on:
       - 'master'
 
 jobs:
-  configure:
+  build:
     runs-on: 'ubuntu-latest'
 
     steps:
@@ -26,14 +26,6 @@ jobs:
       - name: Validate JSON
         run: |
           jq . ./src/config/serviceAccount.json
-
-  build:
-    needs: configure
-    runs-on: 'ubuntu-latest'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
@@ -80,7 +72,7 @@ jobs:
       - name: Configure Docker
         run: |
           gcloud auth configure-docker ${{ secrets.REGION }}-docker.pkg.dev
-          
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ secrets.SERVICE }} \
