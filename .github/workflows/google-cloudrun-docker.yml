@@ -6,15 +6,22 @@ on:
       - 'master'
 
 jobs:
-  deploy:
+  configure:
     runs-on: 'ubuntu-latest'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Create service account file
-        run: echo "${{ secrets.GCP_SA_KEY }}" | sed $'s/\\\\n/\\\n/g' > ./src/config/serviceAccount.json
+        run: node ./fixjson.js
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_NIMBUS_KEY }}
 
       - name: Validate JSON
         run: |
@@ -33,6 +40,11 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ secrets.REGION }}-docker.pkg.dev
 
+  build:
+    needs: configure
+    runs-on: 'ubuntu-latest'
+
+    steps:
       - name: 'Create env file'
         run: |
           echo PORT=${{ secrets.PORT }} >> .env
@@ -48,14 +60,16 @@ jobs:
           docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
 
-      # - name: Deploy to Cloud Run
-      #   run: |
-      #     gcloud run deploy ${{ secrets.SERVICE }} \
-      #       --image ${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:latest \
-      #       --platform managed \
-      #       --region asia-southeast2 \
-      #       --allow-unauthenticated
-            
-      - name: 'Show output'
-        run: |2-
-          echo ${{ steps.deploy.outputs.url }}
+  deploy:
+    needs: build
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ secrets.SERVICE }} \
+            --image ${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:latest \
+            --platform managed \
+            --region asia-southeast2 \
+            --allow-unauthenticated
+      
