@@ -5,7 +5,7 @@ const storage = new Storage({
   keyFilename: './src/config/serviceAccount.json', // Path to the service account file
 });
 
-const bucketName = 'nimbus-storage';
+const bucketName = 'nimbus-capstone';
 const bucket = storage.bucket(bucketName);
 const upload = multer({ storage: multer.memoryStorage() });
 

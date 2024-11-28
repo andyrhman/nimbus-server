@@ -6,15 +6,15 @@
 
 ## Introduction
 
-This is the backend server API for our Bangkit Capstone Project, this server will integrate with the Mobile Development and Web Based Admin Content Management System (CMS)
+This backend server API for our Bangkit Capstone Project, designed to ensure seamless integration across various platforms. It acts as the backbone for connecting the Mobile Development platform and the Web-Based Admin Content Management System (CMS), creating a unified and efficient ecosystem for our application.
 
 ## Features
 
 Here are the features of our backend server API:
 - User authentication and authorization
 - CRUD operations for managing resources
-- Logging and monitoring
 - Travel Destination Recommendation
+- Itinerary Recomenndation using Machine Learning
 
 ## Tools we use
 

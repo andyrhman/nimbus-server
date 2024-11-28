@@ -3,6 +3,7 @@ node_modules/
 dist/
 src/config/serviceAccount.json
 key.json
+dataset.json
 
 # Logs
 logs
