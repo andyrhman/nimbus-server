@@ -11,7 +11,131 @@ import { validateFile } from '../middleware/validation.middleware';
 import { capitalizeFirstLetter } from '../utility/firstLetterCap.utility';
 import { client } from '../index';
 import pako from 'pako';
+import axios from "axios";
 import { invalidateCache, cachePatterns } from '../utility/cachekey.utility';
+
+export const GetRekomendasiTerdekat: any = async (req: Request, res: Response) => {
+    try {
+        const { selected_place, num_recommendations } = req.body;
+
+        if (!selected_place) {
+            return res.status(400).json({ error: "selected_place is required." });
+        }
+
+        const djangoResponse = await axios.post("recommend-destinations", {
+            selected_place,
+            num_recommendations: num_recommendations || 5,
+        });
+
+        if (djangoResponse.status !== 200 || !djangoResponse.data) {
+            return res.status(500).json({ error: "Failed to get recommendations from Django API." });
+        }
+
+        const recommendations = djangoResponse.data;
+
+        const recommendationsWithThumbnails = await Promise.all(
+            recommendations.map(async (recommendation: any) => {
+                const tempatWisata = await myPrisma.tempatWisata.findFirst({
+                    where: { nama: recommendation.nama_destinasi },
+                    select: { id: true, thumbnail: true, review_total: true },
+                });
+
+                return {
+                    ...recommendation,
+                    id: tempatWisata?.id,
+                    thumbnail: tempatWisata?.thumbnail || "No thumbnail available",
+                    review_total: Number(tempatWisata?.review_total) || "No Review available",
+                };
+            })
+        );
+
+        const updatedRecommendations = recommendationsWithThumbnails.slice(1);
+
+        res.status(200).json(updatedRecommendations);
+    } catch (error) {
+        console.error("Error in GetRekomendasiTerdekat:", error.message);
+        res.status(500).json({ error: "An error occurred while processing your request." });
+    }
+};
+
+export const GetTopFiveDestinasiSerupa: any = async (req: Request, res: Response) => {
+    try {
+        const { selected_place } = req.body;
+
+        if (!selected_place) {
+            return res.status(400).json({ error: "selected_place is required" });
+        }
+
+        const djangoResponse = await axios.post("top-five-similar", { selected_place });
+
+        if (djangoResponse.status !== 200 || !djangoResponse.data) {
+            return res.status(500).json({ error: "Failed to fetch data from the Django API" });
+        }
+
+        const { predicted_popularity, top_five_similar_destinations } = djangoResponse.data;
+
+        const destinationsWithThumbnails = await Promise.all(
+            top_five_similar_destinations.map(async (destination: any) => {
+                const tempatWisata = await myPrisma.tempatWisata.findFirst({
+                    where: { nama: destination.nama_destinasi },
+                    select: { id: true, thumbnail: true },
+                });
+
+                return {
+                    ...destination,
+                    id: tempatWisata?.id,
+                    thumbnail: tempatWisata?.thumbnail || "No thumbnail available"
+                };
+            })
+        );
+
+        res.status(200).json({
+            selected_place,
+            predicted_popularity,
+            top_five_similar_destinations: destinationsWithThumbnails,
+        });
+    } catch (error) {
+        console.error("Error in GetTopFiveDestinasiSerupa:", error.message);
+        res.status(500).json({ error: "An error occurred while processing your request" });
+    }
+};
+
+export const GetMostPopularDestination: any = async (req: Request, res: Response) => {
+    try {
+        const { province, category } = req.body;
+
+        if (!province || !category) {
+            return res.status(400).json({ error: "Both 'province' and 'category' are required." });
+        }
+
+        const djangoResponse = await axios.post("most-popular", { province, category });
+
+        if (djangoResponse.status !== 200 || !djangoResponse.data) {
+            return res.status(500).json({ error: "Failed to get data from Django API." });
+        }
+
+        const recommendations = djangoResponse.data;
+
+        const recommendationsWithThumbnails = await Promise.all(
+            recommendations.map(async (recommendation: any) => {
+                const tempatWisata = await myPrisma.tempatWisata.findFirst({
+                    where: { nama: recommendation.nama_destinasi },
+                    select: { thumbnail: true },
+                });
+
+                return {
+                    ...recommendation,
+                    thumbnail: tempatWisata?.thumbnail || "No thumbnail available",
+                };
+            })
+        );
+
+        res.status(200).json(recommendationsWithThumbnails);
+    } catch (error) {
+        console.error("Error in GetMostPopularDestination:", error.message);
+        res.status(500).json({ error: "An error occurred while processing your request." });
+    }
+};
 
 export const GetAllTempatWisata: any = async (req: Request, res: Response) => {
     let searchQuery = req.query.search?.toString().toLowerCase();

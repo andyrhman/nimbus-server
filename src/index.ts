@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import axios from 'axios';
 import { routes } from './routes';
 import { ValidationMiddleware } from './middleware/validation.middleware';
 import { createClient } from 'redis';
@@ -23,6 +24,8 @@ app.use(cors({
     }
 }));
 app.use(ValidationMiddleware);
+
+axios.defaults.baseURL = process.env.ML_ENDPOINT;
 
 routes(app);
 

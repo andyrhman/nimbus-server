@@ -48,6 +48,7 @@ jobs:
           echo JWT_SECRET_ACCESS=${{ secrets.JWT_SECRET_ACCESS }} >> .env
           echo GMAIL_EMAIL=${{ secrets.GMAIL_EMAIL }} >> .env
           echo GMAIL_PASSWORD=${{ secrets.GMAIL_PASSWORD }} >> .env
+          echo ML_ENDPOINT=${{ secrets.ML_ENDPOINT }} >> .env
 
       - name: 'Build and Push Container'
         run: |-

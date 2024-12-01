@@ -1,11 +1,11 @@
 import { Router, Request, Response } from "express";
-import { AuthenticatedUser, Login, Logout, Register, SendPasswordToken, UpdateInfo, UpdatePassword } from "./controllers/auth.controller";
+import { AuthenticatedUser, Login, Logout, Register, UpdateInfo, UpdatePassword } from "./controllers/auth.controller";
 import { AuthMiddleware } from "./middleware/auth.middleware";
 import { CreateProvinsi, DeleteProvinsi, GetAllProvinsi, GetProvinsi, UpdateProvinsi } from "./controllers/provinsi.controller";
 import { CreateCategoryWisata, DeleteCategoryWisata, GetAllCategoryWisata, GetCategoryWisata, UpdateCategoryWisata } from "./controllers/category_wisata.controller";
-import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetTempatWisata, UpdateTempatWisata } from "./controllers/tempat_wisata.controller";
+import { CreateTempatWisata, DeleteTempatWisata, GetAllTempatWisata, GetAllTempatWisataCategory, GetAllTempatWisataProvinsi, GetMostPopularDestination, GetRekomendasiTerdekat, GetTempatWisata, GetTopFiveDestinasiSerupa, UpdateTempatWisata } from "./controllers/tempat_wisata.controller";
 import { CreateRencanaManual, CreateRencanaTempatWisataManual, DeleteRencanaManual, DeleteRencanaTempatWisataManual, GetRencanaUserManual } from "./controllers/rencana_manual.controller";
-import { CreateRencanaOtomatis, GetRencanaUserOtomatis, CreateRencanaTempatWisataOtomatis, DeleteRencanaOtomatis, DeleteRencanaTempatWisataOtomatis } from "./controllers/rencana_otomatis.controller";
+import { CreateRencanaOtomatis, GetRencanaUserOtomatis, DeleteRencanaOtomatis, DeleteRencanaTempatWisataOtomatis } from "./controllers/rencana_otomatis.controller";
 import { DeleteUser, Users } from "./controllers/user.controller";
 import { PerencanaanManualChart, PerencanaanOtomatisChart, Stats, UsersChart } from "./controllers/statistic.controller";
 
@@ -28,7 +28,6 @@ export const routes = (router: Router) => {
     router.get('/api/user', AuthMiddleware, AuthenticatedUser);
     router.post('/api/user/logout', AuthMiddleware, Logout);
     router.put('/api/user/info', AuthMiddleware, UpdateInfo);
-    router.post('/api/user/send-password-token', AuthMiddleware, SendPasswordToken);
     router.put('/api/user/password', AuthMiddleware, UpdatePassword);
 
     // * Authentication Admin
@@ -36,7 +35,6 @@ export const routes = (router: Router) => {
     router.get('/api/admin', AuthMiddleware, AuthenticatedUser);
     router.post('/api/admin/logout', AuthMiddleware, Logout);
     router.put('/api/admin/info', AuthMiddleware, UpdateInfo);
-    router.post('/api/admin/send-password-token', AuthMiddleware, SendPasswordToken);
     router.put('/api/admin/password', AuthMiddleware, UpdatePassword);
 
     // * User
@@ -58,6 +56,9 @@ export const routes = (router: Router) => {
     router.delete('/api/admin/category-wisata/:id', AuthMiddleware, DeleteCategoryWisata);
 
     // * Tempat Wisata
+    router.post('/api/user/recommend-destinations', GetRekomendasiTerdekat);
+    router.post('/api/user/top-five-similar', GetTopFiveDestinasiSerupa);
+    router.post('/api/user/most-popular', GetMostPopularDestination);
     router.get('/api/user/tempat-wisata', GetAllTempatWisata);
     router.get('/api/user/tempat-wisata/:id', GetTempatWisata);
     router.get('/api/user/tempat-wisata/provinsi/:provinsi', GetAllTempatWisataProvinsi);
@@ -77,7 +78,6 @@ export const routes = (router: Router) => {
     // * Perencanaan Otomatis
     router.get('/api/user/rencanaku-ai', AuthMiddleware, GetRencanaUserOtomatis);
     router.post('/api/user/rencana-otomatis', AuthMiddleware, CreateRencanaOtomatis);
-    router.post('/api/user/rencana-wisata-otomatis', AuthMiddleware, CreateRencanaTempatWisataOtomatis);
     router.delete('/api/user/rencana-otomatis/:id', AuthMiddleware, DeleteRencanaOtomatis);
     router.delete('/api/user/rencana-wisata-otomatis/:id_rencana_otomatis/:id_tempat_wisata', AuthMiddleware, DeleteRencanaTempatWisataOtomatis);
 
@@ -86,5 +86,4 @@ export const routes = (router: Router) => {
     router.get('/api/admin/user-chart', AuthMiddleware, UsersChart);
     router.get('/api/admin/pm-chart', AuthMiddleware, PerencanaanManualChart);
     router.get('/api/admin/po-chart', AuthMiddleware, PerencanaanOtomatisChart);
-
 };

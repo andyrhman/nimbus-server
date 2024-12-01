@@ -213,61 +213,8 @@ export const UpdateInfo: any = [
     }
 ];
 
-export const SendPasswordToken: any = async (req: Request, res: Response) => {
-    const body = req.body;
-
-    if (!body.email) {
-        return res.status(400).send({ message: "Provide your email address" });
-    }
-
-    const user = await myPrisma.user.findFirst({ where: { email: body.email } });
-
-    if (!user) {
-        return res.status(400).send({ message: "Email not found" });
-    }
-
-    const token = generateRandom6DigitNumber();
-
-    const tokenExpiresAt = Date.now() + 30 * 60 * 1000;
-
-    await myPrisma.token.create({
-        data: {
-            token,
-            email: user.email,
-            user_id: user.id,
-            expiresAt: tokenExpiresAt
-        }
-    });
-
-    const name = user.nama;
-
-    const source = fs
-        .readFileSync("src/templates/password-reset.hbs", "utf-8")
-        .toString();
-
-    const template = Handlebars.compile(source);
-
-    const replacements = {
-        token,
-        name
-    };
-    const htmlToSend = template(replacements);
-
-    const options = {
-        from: process.env.GMAIL_EMAIL,
-        to: user.email,
-        subject: "Reset Your Password",
-        html: htmlToSend,
-        sandbox: true
-    };
-
-    await transporter.sendMail(options);
-
-    res.status(200).send({ message: "Email has successfully sent" });
-
-};
-
 export const UpdatePassword: any = async (req: Request, res: Response) => {
+    const user = req["user"];
     const body = req.body;
     const input = plainToClass(UpdatePasswordDTO, body);
     const validationErrors = await validate(input);
@@ -276,33 +223,6 @@ export const UpdatePassword: any = async (req: Request, res: Response) => {
         return res.status(400).json(formatValidationErrors(validationErrors));
     }
 
-    const tokenRepository = new TokenService(myPrisma);
-
-    const userToken = await tokenRepository.findByTokenExpiresAt(body.token);
-
-    if (!userToken) {
-        return res.status(400).send({ message: "Invalid Token" });
-    }
-
-    if (userToken.used) {
-        return res
-            .status(400)
-            .send({ message: "Token has already been used" });
-    }
-
-    const user = await myPrisma.user.findFirst({
-        where: { email: userToken.email, id: userToken.user_id },
-    });
-
-    if (!user) {
-        return res.status(400).send({ message: "User not found" });
-    }
-
-    if (user.email !== userToken.email && user.id !== userToken.user_id) {
-        return res.status(400).send({ message: "Invalid Verify ID or email" });
-    }
-
-    await myPrisma.token.update({ where: { id: userToken.id }, data: { used: true } });
     await myPrisma.user.update({
         where: { id: user.id },
         data: { password: await argon2.hash(body.password) }
