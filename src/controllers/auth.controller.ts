@@ -7,12 +7,7 @@ import { UpdateInfoDTO } from '../validation/dto/update-info.dto';
 import { myPrisma } from '../config/db.config';
 import { UpdatePasswordDTO } from '../validation/dto/update-password.dto';
 import { bucket, upload } from '../config/storage.config';
-import { generateRandom6DigitNumber } from '../utility/sixdigitnumber.utility';
-import { TokenService } from '../service/token.service';
 import jwt from 'jsonwebtoken';
-import transporter from '../config/transporter.config';
-import Handlebars from "handlebars";
-import * as fs from "fs";
 import * as argon2 from 'argon2';
 
 export const Register: any = async (req: Request, res: Response) => {
@@ -102,7 +97,7 @@ export const Login: any = async (req: Request, res: Response) => {
         sameSite: 'none', // Required for cross-origin cookies
         // secure: process.env.NODE_ENV === 'production', // Only secure in production
         // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    });    
+    });
 
     return res.send({
         message: "Successfully Logged In!"
@@ -221,6 +216,14 @@ export const UpdatePassword: any = async (req: Request, res: Response) => {
 
     if (validationErrors.length > 0) {
         return res.status(400).json(formatValidationErrors(validationErrors));
+    }
+
+    const oldUserPassword = await myPrisma.user.findUnique({ where: { id: user.id } });
+
+    if (!await argon2.verify(oldUserPassword.password, body.old_password)) {
+        return res.status(400).send({
+            message: "Incorrect Old Password."
+        });
     }
 
     await myPrisma.user.update({

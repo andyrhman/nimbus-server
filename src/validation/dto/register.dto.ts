@@ -1,4 +1,4 @@
-import { IsString, Length, IsEmail } from 'class-validator';
+import { IsString, Length, IsEmail, Matches } from 'class-validator';
 import { IsEqualTo } from '../decorator/check-password.decorator';
 
 export class RegisterDto {
@@ -7,6 +7,7 @@ export class RegisterDto {
 
     @IsString()
     @Length(3, 30, { message: 'Username must be between 3 and 30 characters' })
+    @Matches(/^\S*$/, { message: 'Username must not contain spaces' })
     username: string;
 
     @IsEmail({}, { message: 'Email must be a valid email address' })

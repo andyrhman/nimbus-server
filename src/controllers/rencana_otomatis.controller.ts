@@ -10,13 +10,30 @@ export const GetRencanaUserOtomatis: any = async (req: Request, res: Response) =
     const rencanaku = await myPrisma.perencanaanOtomatis.findMany({
         where: { user_id: user.id },
         include: {
-            tw_perencanaan_otomatis: {
-                include: {
-                    tempatWisata: true
-                }
-            },
             provinsi: true,
             categoryWisata: true
+        }
+    });
+    if (!rencanaku) return res.status(403).send({ message: "Not Allowed!" });
+    res.json(rencanaku);
+};
+
+export const GetRencanaUserDestinasiOtomatis: any = async (req: Request, res: Response) => {
+    const user = req["user"];
+    const rencanaku = await myPrisma.perencanaanOtomatis.findMany({
+        where: { id: Number(req.params.id), user_id: user.id },
+        include: {
+            tw_perencanaan_otomatis: {
+                include: {
+                    tempatWisata:
+                    {
+                        include: {
+                            provinsi: true,
+                            categoryWisata: true
+                        }
+                    }
+                }
+            }
         }
     });
     if (!rencanaku) return res.status(403).send({ message: "Not Allowed!" });

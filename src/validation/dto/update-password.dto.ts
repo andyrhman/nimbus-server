@@ -3,6 +3,9 @@ import { IsEqualTo } from '../decorator/check-password.decorator';
 
 export class UpdatePasswordDTO {
     @IsString()
+    old_password: string;
+
+    @IsString()
     @Length(6, undefined, { message: 'Password must be at least 6 characters long' })
     password: string;
 
