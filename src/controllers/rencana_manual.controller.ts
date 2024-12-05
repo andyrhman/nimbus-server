@@ -47,9 +47,7 @@ export const CreateRencanaManual: any = async (req: Request, res: Response) => {
         data: {
             nama: body.nama,
             budget: body.budget,
-            user_id: user.id,
-            provinsi_id: body.provinsi_id,
-            categoryWisata_id: body.categoryWisata_id
+            user_id: user.id
         }
     });
 

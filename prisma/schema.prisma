@@ -84,13 +84,13 @@ model CategoryWisata {
 model PerencanaanManual {
   id                    Int                             @id @default(autoincrement())
   nama                  String
-  budget                String
+  budget                String?
   user_id               Int
-  categoryWisata_id     Int
-  provinsi_id           Int
+  categoryWisata_id     Int?                            
+  provinsi_id           Int?                            
   created_at            DateTime                        @default(now())
-  categoryWisata        CategoryWisata                  @relation(fields: [categoryWisata_id], references: [id], onDelete: Cascade)
-  provinsi              Provinsi                        @relation(fields: [provinsi_id], references: [id], onDelete: Cascade)
+  categoryWisata        CategoryWisata?                 @relation(fields: [categoryWisata_id], references: [id], onDelete: Cascade) // Make relation optional
+  provinsi              Provinsi?                       @relation(fields: [provinsi_id], references: [id], onDelete: Cascade) // Make relation optional
   user                  User                            @relation(fields: [user_id], references: [id], onDelete: Cascade)
   tw_perencanaan_manual TempatWisataPerencanaanManual[]
 
