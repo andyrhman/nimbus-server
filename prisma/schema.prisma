@@ -86,8 +86,8 @@ model PerencanaanManual {
   nama                  String
   budget                String?
   user_id               Int
-  categoryWisata_id     Int?                            
-  provinsi_id           Int?                            
+  categoryWisata_id     Int?
+  provinsi_id           Int?
   created_at            DateTime                        @default(now())
   categoryWisata        CategoryWisata?                 @relation(fields: [categoryWisata_id], references: [id], onDelete: Cascade) // Make relation optional
   provinsi              Provinsi?                       @relation(fields: [provinsi_id], references: [id], onDelete: Cascade) // Make relation optional
@@ -139,4 +139,10 @@ model Test {
   id        Int    @id @default(autoincrement())
   nama      String
   deskripsi String
+}
+
+model RateLimiterFlexible {
+  key    String    @id
+  points Int
+  expire DateTime?
 }

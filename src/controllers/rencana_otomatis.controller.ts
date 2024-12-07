@@ -44,22 +44,22 @@ export const CreateRencanaOtomatis: any = async (req: Request, res: Response) =>
     const user = req["user"];
     const body = req.body;
 
-    const tempatWisata = await myPrisma.tempatWisata.findMany({
+    const findProv = await myPrisma.provinsi.findUnique({
         where: {
-            provinsi_id: body.provinsi_id,
-            categoryWisata_id: body.categoryWisata_id
+            id: body.provinsi_id
         }
     });
+    console.log(findProv);
+    const findCat = await myPrisma.categoryWisata.findFirst({
+        where: {
+            id: body.categoryWisata_id
+        }
+    });
+    console.log(findCat);
 
-    if (!tempatWisata.length) {
-        return res.status(404).send({ message: "No matching TempatWisata found!" });
-    }
-
-    const randomTempatWisata = tempatWisata[Math.floor(Math.random() * tempatWisata.length)];
-
-    const djangoResponse = await axios.post("recommend-destinations", {
-        selected_place: randomTempatWisata.nama,
-        num_recommendations: 5,
+    const djangoResponse = await axios.post("itinerary-generator", {
+        theme: findCat.nama,
+        region: findProv.nama
     });
 
     if (djangoResponse.status !== 200 || !djangoResponse.data) {

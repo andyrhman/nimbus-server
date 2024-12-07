@@ -6,6 +6,8 @@ import axios from 'axios';
 import { routes } from './routes';
 import { ValidationMiddleware } from './middleware/validation.middleware';
 import { createClient } from 'redis';
+import { RateLimiterMiddleware } from './middleware/rateLimiter.middleware';
+import { connectRedis } from './config/redisClient.config';
 
 dotenv.config();
 
@@ -23,18 +25,16 @@ app.use(cors({
         callback(null, true);
     }
 }));
+app.use(RateLimiterMiddleware);
 app.use(ValidationMiddleware);
 
 axios.defaults.baseURL = process.env.ML_ENDPOINT;
 
 routes(app);
 
-client.on('error', (err) => console.error('Redis Client Error', err));
-
 (async () => {
     try {
-        await client.connect();
-        console.log('Connected to Redis');
+        await connectRedis();
     } catch (error) {
         console.error('Failed to connect to Redis:', error);
     }

@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UpdateTempatWisataDTO } from '../validation/dto/update-tw.dto';
 import { validateFile } from '../middleware/validation.middleware';
 import { capitalizeFirstLetter } from '../utility/firstLetterCap.utility';
-import { client } from '../index';
+import { client } from '../config/redisClient.config';
 import pako from 'pako';
 import axios from "axios";
 import { invalidateCache, cachePatterns } from '../utility/cachekey.utility';
