@@ -21,7 +21,7 @@ jobs:
       - name: Create service account file
         run: node ./fixjson.js
         env:
-          GCP_SA_KEY: ${{ secrets.GCP_NIMBUS_KEY }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
       - name: Validate JSON
         run: |
@@ -80,5 +80,10 @@ jobs:
             --image ${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE }}/${{ secrets.SERVICE }}:latest \
             --platform managed \
             --region asia-southeast2 \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --cpu=2 \
+            --memory=2Gi \
+            --min-instances=1 \
+            --service-min-instances=1 \
+            --max-instances=3
       

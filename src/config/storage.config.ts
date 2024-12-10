@@ -1,7 +1,7 @@
 import { Storage } from '@google-cloud/storage';
 import multer from 'multer';
 const storage = new Storage({
-  projectId: 'nimbus-441508',
+  projectId: 'nimbus-capstone',
   keyFilename: './src/config/serviceAccount.json', // Path to the service account file
 });
 

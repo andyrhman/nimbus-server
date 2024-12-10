@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This backend server API for our Bangkit Capstone Project, designed to ensure seamless integration across various platforms. It acts as the backbone for connecting the Mobile Development platform and the Web-Based Admin Content Management System (CMS), creating a unified and efficient ecosystem for our application.
+This backend server API for our Bangkit Capstone Project, designed to ensure dynamic integration across various platforms. It acts as the central hub for connecting the Mobile Development platform and the Web-Based Admin Content Management System (CMS), creating a unified and efficient ecosystem for our application.
 
 ## Features
 

@@ -3,6 +3,7 @@ node_modules/
 dist/
 src/config/serviceAccount.json
 key.json
+nimbus-service.json
 dataset.json
 
 # Logs
