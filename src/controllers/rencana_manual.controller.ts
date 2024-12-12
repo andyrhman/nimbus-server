@@ -69,7 +69,6 @@ export const CreateRencanaTempatWisataManual: any = async (req: Request, res: Re
 
     const tempatWisata = await myPrisma.tempatWisataPerencanaanManual.create({
         data: {
-            tanggal_perencanaan: new Date(`${body.tanggal_perencanaan}T00:00:00.000Z`),
             perencanaanManual_id: body.perencanaanManual_id,
             tempatWisata_id: body.tempatWisata_id
         }

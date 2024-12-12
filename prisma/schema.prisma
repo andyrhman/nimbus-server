@@ -99,7 +99,7 @@ model PerencanaanManual {
 
 model TempatWisataPerencanaanManual {
   id                   Int               @id @default(autoincrement())
-  tanggal_perencanaan  DateTime
+  tanggal_perencanaan  DateTime?
   tempatWisata_id      Int
   perencanaanManual_id Int
   perencanaanManual    PerencanaanManual @relation(fields: [perencanaanManual_id], references: [id], onDelete: Cascade)
@@ -126,7 +126,7 @@ model PerencanaanOtomatis {
 
 model TempatWisataPerencanaanOtomatis {
   id                     Int                 @id @default(autoincrement())
-  tanggal_perencanaan    DateTime
+  tanggal_perencanaan    DateTime?
   perencanaanOtomatis_id Int
   tempatWisata_id        Int
   perencanaanOtomatis    PerencanaanOtomatis @relation(fields: [perencanaanOtomatis_id], references: [id], onDelete: Cascade)

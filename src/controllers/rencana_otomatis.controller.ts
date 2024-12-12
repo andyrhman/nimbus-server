@@ -107,29 +107,22 @@ export const CreateRencanaOtomatis: any = async (req: Request, res: Response) =>
 
     if (!checkRencanaOtomatisUser) return res.status(403).send({ message: "Not Allowed!" });
 
-    let currentDate = new Date(`${body.tanggal_perencanaan}T00:00:00.000Z`);
 
     const randomPlaces: any[] = [];
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
         const recommendation = validRecommendations[i % validRecommendations.length];
 
         await myPrisma.tempatWisataPerencanaanOtomatis.create({
             data: {
-                tanggal_perencanaan: currentDate,
                 perencanaanOtomatis_id: rencana.id,
                 tempatWisata_id: recommendation.id
             }
         });
 
         randomPlaces.push({
-            tanggal_perencanaan: currentDate,
             tempatWisata: recommendation
         });
-
-        // Increment the date by 2 days for the next iteration
-        currentDate = new Date(currentDate);
-        currentDate.setDate(currentDate.getDate() + 2);
     }
 
     res.send({ rencana, randomPlaces });
