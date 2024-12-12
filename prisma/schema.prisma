@@ -111,7 +111,7 @@ model TempatWisataPerencanaanManual {
 model PerencanaanOtomatis {
   id                      Int                               @id @default(autoincrement())
   nama                    String
-  budget                  String
+  budget                  String?
   user_id                 Int
   provinsi_id             Int
   categoryWisata_id       Int
