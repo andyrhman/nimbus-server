@@ -110,7 +110,7 @@ export const CreateRencanaOtomatis: any = async (req: Request, res: Response) =>
 
     const randomPlaces: any[] = [];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 4; i++) {
         const recommendation = validRecommendations[i % validRecommendations.length];
 
         await myPrisma.tempatWisataPerencanaanOtomatis.create({
